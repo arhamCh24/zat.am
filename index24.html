@@ -34,6 +34,19 @@
           <span id="profile-btn"
             ><i class="fas fa-user-circle fa-2x profile-icon"></i
           ></span>
+
+          <!-- Quick language controls (for testing) -->
+          <div class="lang-toggle">
+            <select id="header-language-select">
+              <option value="sa">देव (sa)</option>
+              <option value="en">Latin (en)</option>
+            </select>
+            <label class="lang-toggle-label">
+              <input type="checkbox" id="header-bilingual-toggle" />
+              Bilingual
+            </label>
+          </div>
+
           <!-- Dropdown Menu -->
           <div id="profile-dropdown" class="dropdown hidden">
             <div class="dropdown-header">
@@ -42,6 +55,19 @@
               </p>
               <span><i class="fas fa-user-circle fa-3x profile-icon"></i></span>
               <span id="username">Hi, username!</span>
+            </div>
+            <hr />
+            <!-- Optional duplicate controls inside dropdown for easy access -->
+            <div class="dropdown-lang-settings">
+              <label for="dropdown-language-select">Script:</label>
+              <select id="dropdown-language-select">
+                <option value="sa">देव (sa)</option>
+                <option value="en">Latin (en)</option>
+              </select>
+              <label>
+                <input type="checkbox" id="dropdown-bilingual-toggle" />
+                Bilingual
+              </label>
             </div>
             <hr />
             <a href="#">Leaderboard</a>
@@ -56,12 +82,31 @@
       <!-- <h1>Hi2</h1> -->
       <!-- title -->
       <div class="title">
-        <h2>
+        <h2
+          data-sanskrit="saMskRtabhAratI"
+        >
           संस्कृतभारती
           <!--जयतु संस्कृतम् ।  -->
         </h2>
         <!--<h2><span style="color:red">श</span><span style="color:yellow">त</span>.<span style="color:blue">म्</span></h2>-->
         <div class="underline"></div>
+      </div>
+      <div class="title-demo">
+        <p
+          data-sanskrit="dharmakSetre kurukSetre"
+        >
+          धर्मक्षेत्रे कुरुक्षेत्रे
+        </p>
+        <p
+          data-sanskrit="yogakSemam vahAmyaham"
+        >
+          योगक्षेमं वहाम्यहम्
+        </p>
+        <p
+          data-sanskrit="sarveSAM maGgalaM bhUyAt"
+        >
+          सर्वेषां मङ्गलं भूयात्
+        </p>
       </div>
       <!-- filter buttons -->
       <div class="btn-container">
@@ -83,5 +128,14 @@
     <!-- javascript -->
     <script src="app.js"></script>
     <script type="module" src="/js/navbar-auth.js"></script>
+    <script type="module">
+      import { applyUserLanguageToPage } from "/auth/api/lang-settings.js";
+
+      // Apply the current user's language/script preference to any
+      // elements on this page marked with data-sanskrit.
+      applyUserLanguageToPage().catch((err) => {
+        console.error("Failed to apply language settings on index24", err);
+      });
+    </script>
   </body>
 </html>

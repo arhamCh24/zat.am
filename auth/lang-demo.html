@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Language Demo - zat.am</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-box">
+        <h2>Language / Script Demo</h2>
+        <div class="header-divider"></div>
+        <p class="user-message">
+          This page shows how your saved language/script preference and
+          bilingual toggle can change how Sanskrit text is displayed using
+          Sanscript.js.
+        </p>
+        <p class="user-message">
+          The underlying text is stored once in a romanization scheme
+          (Harvard-Kyoto) and then transliterated into different scripts.
+        </p>
+
+        <hr class="header-divider" />
+
+        <p>Your current setting renders the sample verse as:</p>
+        <p id="demo-text" data-sanskrit="dharmakSetre kurukSetre">
+          dharmakSetre kurukSetre
+        </p>
+
+        <div id="demo-status" class="user-message"></div>
+
+        <p class="user-message">
+          To change how this looks, go back to the dashboard and adjust your
+          <strong>Language &amp; Script</strong> settings.
+        </p>
+
+        <p><a href="./dashboard.html">← Back to Dashboard</a></p>
+      </div>
+    </div>
+
+    <script type="module" src="./js/lang-demo.js"></script>
+  </body>
+</html>

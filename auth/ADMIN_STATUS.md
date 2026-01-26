@@ -20,6 +20,8 @@ Each authenticated user has a corresponding document in the `users` collection:
   - `name` (string) – display name
   - `isAdmin` (boolean) – admin flag (default `false`)
   - `createdAt` (timestamp) – server timestamp when the profile is created
+  - `langCode` (string) – short code for preferred Sanskrit script (e.g. `"sa"`, `"en"`)
+  - `bilingualEnabled` (boolean) – whether games should honor the user’s script preference
 
 Example document structure:
 
@@ -28,7 +30,9 @@ Example document structure:
   "email": "user@example.com",
   "name": "User Name",
   "isAdmin": false,
-  "createdAt": {".sv": "timestamp"}
+  "createdAt": {".sv": "timestamp"},
+  "langCode": "sa",
+  "bilingualEnabled": false
 }
 ```
 
@@ -112,7 +116,39 @@ Exports:
 
 ---
 
-## 4. Auth Flow and User Document Creation
+## 4. Language Preferences (Sanskrit Script + Bilingual Toggle)
+
+In addition to `isAdmin`, user documents now track **language/script preferences** that games can use to render Sanskrit text using Sanscript.js.
+
+- `langCode` (string)
+  - Short code stored per user.
+  - Prototype values:
+    - `"sa"` – Sanskrit in Devanagari script.
+    - `"en"` – Sanskrit in Latin letters (Harvard–Kyoto romanization).
+- `bilingualEnabled` (boolean)
+  - When `true`, games that opt in will render Sanskrit using the user’s preferred script.
+  - When `false`, games use their default script (usually Devanagari), ignoring the preference.
+
+These fields are **editable by the user** via the Dashboard UI and are protected by the same rules as other profile fields: users may update their own document except for `isAdmin`.
+
+Implementation details:
+
+- Default values for new users are set in `ensureUserDocument`:
+  - `langCode: "sa"`
+  - `bilingualEnabled: false`
+- Helpers in `auth/api/auth-api.js`:
+  - `updateCurrentUserProfile(partialData)` – generic profile updater that strips `isAdmin` from client writes.
+  - `updateUserLanguageSettings({ langCode, bilingualEnabled })` – convenience wrapper used by the Dashboard.
+- Language utilities in `auth/api/lang-settings.js`:
+  - Map `langCode` → Sanscript scheme (e.g. `"sa" → "devanagari"`, `"en" → "hk"`).
+  - `loadUserLanguageSettings()` – reads `langCode` and `bilingualEnabled` from the current user’s profile with safe defaults.
+  - `applyUserLanguageToPage()` – optional helper for games: looks for elements with `data-sanskrit` and transliterates their content using Sanscript according to the user’s settings.
+
+> Firestore is schemaless, so **no manual migration** is required to "add" these fields. Existing documents simply don’t have them yet; they will be added the first time a user updates their preferences from the Dashboard or via a backend script.
+
+---
+
+## 5. Auth Flow and User Document Creation
 
 All auth paths ensure a corresponding Firestore `users/{uid}` document exists.
 
@@ -172,7 +208,7 @@ Result:
 
 ---
 
-## 5. Helper Functions for Teams
+## 6. Helper Functions for Teams
 
 All helpers are in `auth/api/auth-api.js`.
 
@@ -242,7 +278,7 @@ if (canReset) {
 
 ---
 
-## 6. Leaderboard Team: How to Use Admin Status
+## 7. Leaderboard Team: How to Use Admin Status
 
 ### 6.1 Client-Side Usage (UI / Buttons)
 

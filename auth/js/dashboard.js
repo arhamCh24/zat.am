@@ -1,10 +1,19 @@
-import { checkAuth, logout, changePassword } from "../api/auth-api.js";
+import {
+  checkAuth,
+  logout,
+  changePassword,
+  getCurrentUserProfile,
+  updateUserLanguageSettings,
+} from "../api/auth-api.js";
 
 const userName = document.getElementById("user-name");
 const userEmail = document.getElementById("user-email");
 const logoutBtn = document.getElementById("logout-btn");
 const changePasswordForm = document.getElementById("change-password-form");
 const passwordMessage = document.getElementById("password-message");
+const languageSelect = document.getElementById("language-select");
+const bilingualToggle = document.getElementById("bilingual-toggle");
+const languageMessage = document.getElementById("language-message");
 
 // Check if user is logged in
 checkAuth()
@@ -19,6 +28,23 @@ checkAuth()
 
     userName.textContent = displayName;
     userEmail.textContent = user.email;
+
+    // Load and apply saved language settings (if any)
+    getCurrentUserProfile()
+      .then((profile) => {
+        if (!profile) return;
+
+        if (languageSelect && profile.langCode) {
+          languageSelect.value = profile.langCode;
+        }
+
+        if (bilingualToggle && typeof profile.bilingualEnabled === "boolean") {
+          bilingualToggle.checked = profile.bilingualEnabled;
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load language settings", err);
+      });
   })
   .catch(() => {
     window.location.href = "login.html";
@@ -33,6 +59,37 @@ logoutBtn.addEventListener("click", async () => {
     console.error(error);
   }
 });
+
+// Language + bilingual toggle settings
+const saveLanguageSettings = async () => {
+  if (!languageSelect || !bilingualToggle) return;
+
+  try {
+    await updateUserLanguageSettings({
+      langCode: languageSelect.value,
+      bilingualEnabled: bilingualToggle.checked,
+    });
+    if (languageMessage) {
+      languageMessage.textContent = "Language settings saved.";
+      languageMessage.style.color = "green";
+    }
+  } catch (error) {
+    console.error(error);
+    if (languageMessage) {
+      languageMessage.textContent =
+        "Failed to save language settings. Please try again.";
+      languageMessage.style.color = "red";
+    }
+  }
+};
+
+if (languageSelect) {
+  languageSelect.addEventListener("change", saveLanguageSettings);
+}
+
+if (bilingualToggle) {
+  bilingualToggle.addEventListener("change", saveLanguageSettings);
+}
 
 // Change password form
 changePasswordForm.addEventListener("submit", async (e) => {

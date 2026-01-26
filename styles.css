@@ -324,6 +324,30 @@ Menu
   position: relative;
   display: inline-block;
 }
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+}
+.lang-toggle select {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+}
+.lang-toggle-label {
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.dropdown-lang-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.dropdown-lang-settings select {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+}
 
 /* Profile Icon Button */
 .profile-icon {
