@@ -1,23 +1,37 @@
-import { checkAuth, logout } from "../api/auth-api.js";
+// dashboard.js
+import { auth } from "../api/firebase-config.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { db } from "../api/firebase-config.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const userEmail = document.getElementById("user-email");
+const userEmailDiv = document.getElementById("user-email");
 const logoutBtn = document.getElementById("logout-btn");
 
-// Check if user is logged in
-checkAuth()
-  .then((user) => {
-    userEmail.innerHTML = `<p>You are logged in as: <strong>${user.email}</strong></p>`;
-  })
-  .catch(() => {
-    window.location.href = "login.html";
-  });
+// ✅ Listen for user session
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    let displayName = user.displayName;
 
-// Logout button
-logoutBtn.addEventListener("click", async () => {
-  try {
-    await logout();
+    // 🔄 If no displayName, try Firestore
+    if (!displayName) {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        displayName = userDoc.data().name;
+      }
+    }
+
+    userEmailDiv.innerHTML = `Welcome, ${displayName || user.email}`;
+  } else {
+    // 🚪 Not logged in — go to login
     window.location.href = "login.html";
-  } catch (error) {
-    console.error(error);
   }
+});
+
+// 🔐 Logout logic
+logoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
 });

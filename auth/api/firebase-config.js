@@ -1,5 +1,5 @@
-// Firebase Configuration for zat.am project
-import { initializeApp } from "firebase/app";
+// firebase-config.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -10,28 +10,30 @@ import {
   sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup
-} from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+import {
+  getFirestore
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
+// ✅ Your Firebase config
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCKRTSrKLzzN5QEqudjjPyqtOKs0N91o-o",
+  authDomain: "zat-am-45a24.firebaseapp.com",
+  projectId: "zat-am-45a24",
+  storageBucket: "zat-am-45a24.firebasestorage.app",
+  messagingSenderId: "601973166493",
+  appId: "1:601973166493:web:9466d7f41ea22433c31f74",
+  measurementId: "G-TXXP8EDHKZ"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Export Firebase functions
 export {
-  auth,
-  db,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -39,5 +41,5 @@ export {
   updateProfile,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithPopup
 };

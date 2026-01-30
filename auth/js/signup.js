@@ -1,3 +1,4 @@
+// signup.js
 import { signUp, updateUserProfile } from "../api/auth-api.js";
 
 const signupForm = document.getElementById("signup-form");
@@ -15,7 +16,7 @@ signupForm.addEventListener("submit", async (e) => {
   const password = passwordInput.value;
   const confirmPassword = confirmPasswordInput.value;
 
-  // Validation
+  // 🚫 Basic validation
   if (password !== confirmPassword) {
     message.innerHTML = "Passwords do not match!";
     message.style.color = "red";
@@ -29,21 +30,22 @@ signupForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    // Create account
+    // ✅ Create user with Firebase Auth
     const userCred = await signUp(email, password);
     const user = userCred.user;
 
-    // Update user profile with display name
+    // ✅ Update user's display name in Firebase Auth
     await updateUserProfile(user, {
-      displayName: name,
+      displayName: name
     });
 
-    message.innerHTML = "Account created! Redirecting to login...";
+    message.innerHTML = "Account created! Redirecting...";
     message.style.color = "green";
 
+    // ✅ Redirect to preferences.html
     setTimeout(() => {
-      window.location.href = "login.html";
-    }, 1500);
+      window.location.href = "preferences.html";
+    }, 1000);
   } catch (error) {
     console.error(error);
     message.innerHTML = error.message;
