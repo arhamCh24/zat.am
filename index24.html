@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>शत.म् zat.am</title>
+    <title>शत.म् zat.am</title>   
     <!-- font-awesome -->
     <link
       rel="stylesheet"
@@ -19,11 +19,11 @@
       <!-- Show when logged out -->
       <div class="auth-btn">
         <span id="logged-out">
-          <button onclick="window.location.href = './auth/login.html'">
+          <button data-cy="login-btn" onclick="window.location.href = './auth/login.html'">
             Login
           </button>
 
-          <button onclick="window.location.href = './auth/signup.html'">
+          <button data-cy="signup-btn" onclick="window.location.href = './auth/signup.html'">
             Sign Up
           </button>
         </span>
@@ -31,7 +31,7 @@
         <!-- Show when logged in -->
         <div id="logged-in" class="hidden profile-container">
           <!-- Profile Icon -->
-          <span id="profile-btn"
+          <span data-cy="profile-button" id="profile-btn"
             ><i class="fas fa-user-circle fa-2x profile-icon"></i
           ></span>
           <!-- Dropdown Menu -->
@@ -46,7 +46,7 @@
             <hr />
             <a href="#">Leaderboard</a>
             <a href="./auth/profile.html">Profile</a>
-            <a href="#" id="dropdown-logout">Logout</a>
+            <a href="#" data-cy="logout-button" id="dropdown-logout">Logout</a>
           </div>
         </div>
       </div>
@@ -54,7 +54,7 @@
     <section class="menu">
       <!-- <h1>Hi2</h1> -->
       <!-- title -->
-      <div class="title">
+      <div data-cy="main-title" class="title">
         <h2>
           संस्कृतभारती
           <!--जयतु संस्कृतम् ।  -->

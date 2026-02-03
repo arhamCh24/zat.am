@@ -404,11 +404,11 @@ window.addEventListener("DOMContentLoaded", function () {
 
 function diplayMenuItems(menuItems) {
   let displayMenu = menuItems.map(function (item) {
-    return `<article class="menu-item">
+    return `<article class="menu-item" data-cy="game-${item.dir}">
           <img src=${item.dir}/cover.jpg alt="${item.title}" class="photo" />
           <div class="item-info">
             <header>
-              <a href=${item.dir}/ target="zat.am">${item.title}</a>
+              <a href=${item.dir}/ target="zat.am" data-cy="game-link-${item.dir}">${item.title}</a>
               <h4 class="price">${item.category}</h4>
             </header>
             <p class="item-text">

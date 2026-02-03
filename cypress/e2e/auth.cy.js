@@ -1,0 +1,162 @@
+//Getting to the Main page
+describe("Auth - smoke", () => {
+  it("loads the app entry page", () => {
+    cy.visit("/index24.html");
+    cy.get('[data-cy="main-title"]').should('be.visible');
+  });
+});
+
+
+//Clicking the login Button
+describe("Auth navigation", () => {
+  it("navigates to login page from main page", () => {
+    cy.visit("/index24.html");
+
+    cy.get('[data-cy="login-btn"]').should("be.visible");
+
+    cy.get('[data-cy="login-btn"]').click();
+
+    cy.url().should("include", "/auth/login.html");
+
+    cy.visit("/index24.html");
+
+  });
+});
+
+//Clicking the signup Button
+describe("Auth navigation", () => {
+  it("navigates to signup page from main page", () => {
+    cy.visit("/index24.html");
+
+    cy.get('[data-cy="signup-btn"]').should("be.visible");
+
+    cy.get('[data-cy="signup-btn"]').click();
+
+    cy.url().should("include", "/auth/signup.html");
+  });
+});
+
+//Creating a user
+describe("Signup flow", () => {
+  it("creates a new account successfully", () => {
+    cy.visit("/auth/signup.html");
+
+    const timestamp = Date.now();
+    const email = `testuser_${new Date().toISOString().replace(/[:.]/g, "-")}@example.com`;
+    const password = "TestPass123!";
+
+    cy.get('[data-cy="signup-name"]').type("Cypress Test User");
+    cy.get('[data-cy="signup-email"]').type(email);
+    cy.get('[data-cy="signup-password"]').type(password);
+    cy.get('[data-cy="signup-cpassword"]').type(password);
+
+    cy.get('[data-cy="create-btn"]').click();
+
+    cy.get('[data-cy="message"]', { timeout: 10000 })
+      .should("be.visible")
+      .and("not.contain", "error");
+
+    // --- REDIRECT TO PREFERENCES ---
+    cy.url({ timeout: 15000 }).should("include", "preferences");
+
+    cy.get('[data-cy="pref-heading"]', { timeout: 10000 })
+      .should("contain.text", "Select Your Preferences");
+
+    // --- PREFERENCES ---
+    cy.get('[data-cy="language-select"]').select("Tamil (தமிழ்)");
+    cy.get('[data-cy="language-select"]').should("have.value", "ta");
+
+    cy.get('[data-cy="country-select"]').select("Canada");
+    cy.get('[data-cy="country-select"]').should("have.value", "Canada");
+
+    cy.get('[data-cy="province-group"]', { timeout: 10000 })
+      .should("not.have.class", "hidden");
+
+    cy.get('[data-cy="province-select"] option')
+      .should("have.length.greaterThan", 1);
+
+    cy.get('[data-cy="province-select"]').then(($select) => {
+      const options = $select.find("option");
+      if (options.length > 1) {
+        cy.wrap($select).select(options.eq(1).val());
+      }
+    });
+
+    // Continue
+    cy.get('[data-cy="continue-btn"]').click();
+
+    // Final redirect (dashboard / game / home)
+    cy.url({ timeout: 15000 }).should("not.include", "preferences");
+
+    cy.wait(3000);
+
+    // Open profile menu
+    cy.get('[data-cy="profile-button"]')
+      .should("be.visible")
+      .click();
+
+    cy.window().then((win) => {
+      cy.stub(win, "alert").as("alert");
+    });
+
+    // Click logout
+    cy.get('[data-cy="logout-button"]')
+      .should("be.visible")
+      .click();
+
+    // ✅ assert alert message was triggered
+    cy.get("@alert").should("have.been.calledWith", "Logged out successfully!");
+
+      });
+    });
+
+
+describe("Game navigation after login", () => {
+  it("logs in and opens the vishwa game (bp26)", () => {
+    // Step 1: Login
+    cy.visit("/auth/login.html");
+
+    cy.get('[data-cy="signin-email"]').type("testuser_1@example.com");
+    cy.get('[data-cy="signin-password"]').type("TestPass123!");
+    cy.get('[data-cy="signin-btn"]').click();
+
+    // Step 2: Ensure we are redirected to main page
+    cy.url({ timeout: 10000 }).should("include", "/index24.html");
+
+    // Step 3: Wait for games to render (important – dynamic content)
+    cy.get('[data-cy="game-bp26"]', { timeout: 10000 })
+      .should("be.visible");
+
+    // Step 4: Click the vishwa game
+    cy.get('[data-cy="game-link-bp26"]', { timeout: 10000 })
+      .should("be.visible")
+      .invoke("removeAttr", "target")   
+      .click();
+
+    // Step 5: Assert navigation to the game
+    cy.url({ timeout: 10000 }).should("include", "/bp26/");
+
+    cy.visit("/index24.html");
+
+    
+    cy.wait(3000);
+
+    // Open profile menu
+    cy.get('[data-cy="profile-button"]')
+      .should("be.visible")
+      .click();
+
+    cy.window().then((win) => {
+      cy.stub(win, "alert").as("alert");
+    });
+
+    // Click logout
+    cy.get('[data-cy="logout-button"]')
+      .should("be.visible")
+      .click();
+
+    // ✅ assert alert message was triggered
+    cy.get("@alert").should("have.been.calledWith", "Logged out successfully!");
+
+  });
+}); 
