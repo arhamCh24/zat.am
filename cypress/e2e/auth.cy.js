@@ -136,6 +136,9 @@ describe("Game navigation after login", () => {
     // Step 5: Assert navigation to the game
     cy.url({ timeout: 10000 }).should("include", "/bp26/");
 
+    cy.wait(2000);
+
+
     cy.visit("/index24.html");
 
     
@@ -160,3 +163,43 @@ describe("Game navigation after login", () => {
 
   });
 }); 
+
+describe("Protected routes when logged out", () => {
+  it("blocks bp26 when logged out and redirects to login, then returns to main", () => {
+    // 1) Ensure logged out state as best as possible
+    cy.clearCookies();
+    cy.clearAllLocalStorage();
+
+    // Go to main first
+    cy.visit("/index24.html");
+
+    // 2) Try to access protected game directly
+        cy.get('[data-cy="game-bp26"]', { timeout: 10000 })
+          .should("be.visible");
+
+    // Step 4: Click the vishwa game
+        cy.get('[data-cy="game-link-bp26"]', { timeout: 10000 })
+          .should("be.visible")
+          .invoke("removeAttr", "target")   
+          .click();
+
+    // 3) Assert we're blocked (either redirected to login OR shown login UI)
+    cy.url({ timeout: 15000 }).then((url) => {
+      if (url.includes("/auth/login.html")) {
+        // redirected to login page
+        cy.get('[data-cy="signin-email"]', { timeout: 10000 }).should("be.visible");
+        cy.get('[data-cy="signin-password"]').should("be.visible");
+      } else {
+        // fallback: some apps render login UI in-place
+        cy.get('[data-cy="signin-email"]', { timeout: 10000 }).should("be.visible");
+      }
+    });
+
+    // 4) Go back to main and confirm we're still logged out
+    cy.visit("/index24.html");
+
+    cy.get('[data-cy="main-title"]').should("be.visible");
+    cy.get('[data-cy="login-btn"]').should("be.visible");
+    cy.get('[data-cy="signup-btn"]').should("be.visible");
+  });
+});
