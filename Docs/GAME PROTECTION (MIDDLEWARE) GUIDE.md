@@ -22,7 +22,8 @@ At the top of auth/api/middleware.js, we define which games require authenticati
 - Currently only "bp26" is protected
 - To protect more games in the future, just add their folder names to this array
 
-**Example:** To protect a new game called "quiz", add it like this:![](./images/Aspose.Words.ddeeec66-cbcb-4782-8943-2c09e9ef41a7.002.png)
+**Example:** To protect a new game called "quiz", add it like this:
+![](./images/Aspose.Words.ddeeec66-cbcb-4782-8943-2c09e9ef41a7.002.png)
 
 **Checking if Current Page is Protected**\
 The isProtectedGame() function checks if the user is trying to access a protected game:
