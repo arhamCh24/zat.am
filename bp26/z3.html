@@ -72,7 +72,7 @@
                     //S.clear();
                     tillabs = [];
                     var mywords = words.slice();
-                    special = rand(wpp); // index starts at 0
+                    special = rand(wpp-1); // index starts at 0
                     wintmp = mywords[special]
                     if (tScript) wintmp += "\n" + translit.transliterate(String(wintmp), 'devanagari');
                     for (var j = 0; j < wpp; j++) {
