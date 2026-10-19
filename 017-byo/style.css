@@ -1,6 +1,5 @@
 #container {
   width: min(100%, 1024px);
-  min-height: 504px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 273px minmax(0, 1fr);
@@ -54,7 +53,6 @@
   position: absolute;
   top: 0;
   left: 731px;
-  float: left;
 }
 
 #top-sections .section,
@@ -252,7 +250,6 @@
     padding: 8px 4px;
     box-sizing: border-box;
     display: flex;
-    flex: 1;
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;

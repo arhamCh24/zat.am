@@ -104,7 +104,6 @@ if (t==1)
 		var activeBtn = $(".active");
 		if(activeBtn.length){
 			$(activeBtn).removeClass("active");
-			btnOff(activeBtn[0]);
 		}
 
 	}
@@ -158,19 +157,11 @@ if (t==1)
 	}
 	
 	function btnOn(element){
-		if (element.tagName === "P") {
-			element.style.fontWeight = "bold";
-		} else {
-			element.src = element.src.replace("_off", "_on");
-		}
+		element.src = element.src.replace("_off", "_on");
 	}
 	
 	function btnOff(element){
-		if (element.tagName === "P") {
-			element.style.fontWeight = "";
-		} else {
-			element.src = element.src.replace("_on", "_off");
-		}
+		element.src = element.src.replace("_on", "_off");
 	}
 	
 for (let i = 1; i <= 12; i++) {
