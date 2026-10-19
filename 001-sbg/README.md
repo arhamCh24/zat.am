@@ -4,14 +4,15 @@ A static Sanskrit word-search game based on verses from the Bhagavad Gita.
 
 ## Run locally
 
-The game has no build step or runtime dependencies. From this folder, start a
-static server:
+The game has no build step. It uses the repository-wide navbar, theme, and
+leaderboard modules, so start a static server from the repository root:
 
 ```powershell
+cd C:\Zatam\zat.am
 npx --yes serve . -l 4173
 ```
 
-Then open `http://localhost:4173/index.html?size=10&ch=1&v=1`.
+Then open `http://localhost:4173/001-sbg/index.html?size=10&ch=1&v=1`.
 
 ## Test
 
@@ -22,7 +23,22 @@ npm test
 ```
 
 They cover URL validation, chapter/verse boundaries, Devanagari-number
-formatting, timer behavior, and the module load order in the main page.
+formatting, timer behavior, scoring rules, and the module load order in the
+main page.
+
+## Shared theme and scoring
+
+This game uses the shared Zat.am game shell from `../shared/game-theme.css`
+and the shared leaderboard module at `../js/game-score.js`.
+
+- A new puzzle starts at **100 points**.
+- Each incorrect grid click costs **5 points**.
+- The first hint costs **10 points**; reopening it does not cost more.
+- Completing the full puzzle submits the final 0–100 score once for signed-in
+  players. The completion time is recorded as a leaderboard metric.
+- A time-out shows a local score of 0 but does not create a leaderboard entry.
+- If the shared leaderboard is temporarily unavailable, the puzzle and its
+  local score still work normally.
 
 ## Structure
 
@@ -30,6 +46,7 @@ formatting, timer behavior, and the module load order in the main page.
 - `styles/` — responsive layout and game stylesheets.
 - `scripts/game.js` — UI controller and word-search board renderer.
 - `scripts/game/config.js` — pure puzzle configuration and formatting helpers.
+- `scripts/game/scoring.js` — local, testable inputs for the shared scoring policy.
 - `scripts/timer.js` — reusable countdown timer.
 - `scripts/` — remaining variant and presentation scripts.
 - `data/` — Bhagavad Gita verse data. Despite its former `.json` name, this is a JavaScript data file that defines `data`.

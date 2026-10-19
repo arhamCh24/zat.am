@@ -6,6 +6,10 @@ const indexHtml = readFileSync(
   new URL("../index.html", import.meta.url),
   "utf8",
 );
+const gameScript = readFileSync(
+  new URL("../scripts/game.js", import.meta.url),
+  "utf8",
+);
 
 test("the game starts as a module after the classic verse-data script", () => {
   assert.match(
@@ -28,4 +32,31 @@ test("the page uses unique native controls without legacy event handlers or depe
 
   assert.doesNotMatch(indexHtml, /\son[a-z]+\s*=/i);
   assert.doesNotMatch(indexHtml, /jquery|popper|bootstrap|timer\.css/i);
+});
+
+test("the page uses the shared Zat.am game theme and score UI", () => {
+  assert.match(indexHtml, /href=["']\.\.\/shared\/game-theme\.css["']/);
+  assert.match(indexHtml, /class=["'][^"']*zatam-themed-game[^"']*["']/);
+
+  for (const id of [
+    "scoreValue",
+    "mistakesValue",
+    "hintsValue",
+    "resultPanel",
+    "resultScore",
+    "scoreSaveStatus",
+    "play-again",
+  ]) {
+    assert.match(indexHtml, new RegExp(`id=["']${id}["']`));
+  }
+
+  assert.match(gameScript, /\.\.\/\.\.\/js\/game-score\.js/);
+  assert.match(gameScript, /import\(SHARED_SCORE_MODULE_URL\)/);
+  assert.match(gameScript, /Shared leaderboard is unavailable/);
+  assert.match(gameScript, /SCORE_INITIALIZATION_TIMEOUT_MS/);
+  assert.match(gameScript, /await this\.waitForScoreApi\(\)/);
+  assert.match(gameScript, /startedAt: this\.runStartedAt/);
+  assert.match(gameScript, /initGameScore\(/);
+  assert.match(gameScript, /scoreFromPenalties\(/);
+  assert.match(gameScript, /submitGameScore\(/);
 });

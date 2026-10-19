@@ -5,32 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="A Sanskrit Bhagavad Gita word-search game.">
     <title>अन्वेषणम् | Zat.am</title>
+    <link rel="stylesheet" href="../shared/game-theme.css">
     <link rel="stylesheet" href="styles/game.css">
   </head>
-  <body data-page="games">
+  <body data-page="games" class="zatam-themed-game zatam-word-search-game">
     <!-- Shared Zat.am Navbar -->
     <div id="navbar-mount"></div>
 
-    <main class="game-page">
-      <header class="game-header">
+    <main class="zatam-game-shell game-page">
+      <header class="zatam-game-header game-header">
         <p class="mangalam">॥ श्रीः ॥</p>
-        <p id="timer" role="timer" aria-live="polite">३०</p>
-        <h1>अन्वेषणम्</h1>
-        <p id="lead">
-          अस्मिन् अक्षरसमूहे श्रीमद्भगवद्गीतातः
-          <span id="nPresent"></span> पदानि सन्ति। करोतु अन्वेषणम्।<br>
-          <span id="lead2"></span>
+        <span class="zatam-game-eyebrow">भगवद्गीता पदान्वेषणम्</span>
+        <h1 class="zatam-game-title">अन्वेषणम्</h1>
+        <p class="zatam-game-subtitle">
+          Find the hidden Sanskrit words from a Bhagavad Gita verse before time runs out.
         </p>
-        <p id="statusMessage" aria-live="polite" hidden>
-          <span id="nFound"></span> पदानि अन्वेषितानि
-        </p>
-        <p id="finishMessage" role="status" hidden>॥ शुभमस्तु ॥</p>
       </header>
+
+      <section class="zatam-game-instructions" aria-label="How to play">
+        <p>
+          Click the first cell of each hidden word. An incorrect click costs 5 points;
+          using the hint costs 10 points once per puzzle.
+        </p>
+        <p id="lead2" class="verse-preview" aria-live="polite"></p>
+        <p id="statusMessage" class="zatam-game-status" role="status" aria-live="polite" hidden></p>
+      </section>
+
+      <section class="zatam-game-stats" aria-label="Game progress">
+        <div class="zatam-game-stat zatam-game-score">
+          <span class="zatam-game-stat-label">Score</span>
+          <span id="scoreValue" class="zatam-game-stat-value">100</span>
+        </div>
+        <div class="zatam-game-stat">
+          <span class="zatam-game-stat-label">Found</span>
+          <span class="zatam-game-stat-value"><span id="nFound">०</span> / <span id="nPresent">०</span></span>
+        </div>
+        <div class="zatam-game-stat">
+          <span class="zatam-game-stat-label">Mistakes</span>
+          <span id="mistakesValue" class="zatam-game-stat-value">0</span>
+        </div>
+        <div class="zatam-game-stat">
+          <span class="zatam-game-stat-label">Hints</span>
+          <span id="hintsValue" class="zatam-game-stat-value">0</span>
+        </div>
+        <div class="zatam-game-stat">
+          <span class="zatam-game-stat-label">Time</span>
+          <span id="timer" class="zatam-game-stat-value" role="timer" aria-live="polite">३०</span>
+        </div>
+      </section>
 
       <div class="game-layout">
         <aside class="game-controls" aria-label="क्रीडा-विकल्पाः">
-          <section class="control-group" aria-labelledby="verse-settings-heading">
-            <h2 id="verse-settings-heading">श्लोक-विकल्पाः</h2>
+          <section class="control-group zatam-game-card" aria-labelledby="verse-settings-heading">
+            <h2 id="verse-settings-heading" class="zatam-game-section-title">श्लोक-विकल्पाः</h2>
 
             <label for="chapter-select">अध्यायः</label>
             <select id="chapter-select" name="chapter">
@@ -42,43 +69,53 @@
               <option value="">चिनोतु</option>
             </select>
 
-            <button id="load-verse" type="button" disabled>
+            <button id="load-verse" class="zatam-game-btn zatam-game-btn-primary" type="button" disabled>
               आरभताम्
             </button>
           </section>
 
-          <section class="control-group" aria-labelledby="difficulty-heading">
-            <h2 id="difficulty-heading">कठिनता</h2>
+          <section class="control-group zatam-game-card" aria-labelledby="difficulty-heading">
+            <h2 id="difficulty-heading" class="zatam-game-section-title">कठिनता</h2>
             <div class="difficulty-options" role="group" aria-label="कठिनता">
-              <button class="difficulty-button" type="button" data-size="5">सरलम्</button>
-              <button class="difficulty-button" type="button" data-size="7">मध्यमम्</button>
-              <button class="difficulty-button" type="button" data-size="10">कठिनम्</button>
+              <button class="difficulty-button zatam-game-btn zatam-game-btn-secondary" type="button" data-size="5">सरलम्</button>
+              <button class="difficulty-button zatam-game-btn zatam-game-btn-secondary" type="button" data-size="7">मध्यमम्</button>
+              <button class="difficulty-button zatam-game-btn zatam-game-btn-secondary" type="button" data-size="10">कठिनम्</button>
             </div>
           </section>
         </aside>
 
-        <section class="game-board" aria-label="अक्षरसमूहः">
+        <section class="game-board zatam-game-play-area" aria-label="अक्षरसमूहः">
           <div id="gridParent">
             <div id="grid" role="grid" aria-label="पदान्वेषण-अक्षरसमूहः"></div>
           </div>
         </section>
       </div>
 
-      <nav class="game-actions" aria-label="क्रीडा-क्रियाः">
-        <button id="hint-button" type="button" aria-controls="hintPopup" aria-expanded="false">
+      <nav class="game-actions zatam-game-actions" aria-label="क्रीडा-क्रियाः">
+        <button id="hint-button" class="zatam-game-btn zatam-game-btn-accent" type="button" aria-controls="hintPopup" aria-expanded="false">
           <img src="assets/images/hint.png" alt="">
           <span>पदानि कानि?</span>
         </button>
-        <button id="refresh-button" type="button">
+        <button id="refresh-button" class="zatam-game-btn zatam-game-btn-secondary" type="button">
           <img src="assets/images/refresh.png" alt="">
           <span>पुनः</span>
         </button>
       </nav>
 
-      <div id="hintPopup" class="hint-popup" role="dialog" aria-modal="true" aria-labelledby="hint-heading" hidden>
-        <section class="content">
+      <section id="resultPanel" class="zatam-game-result" role="status" aria-live="polite" hidden>
+        <h2 id="resultTitle" class="zatam-game-result-title">॥ शुभमस्तु ॥</h2>
+        <div id="resultScore" class="zatam-game-result-score">100</div>
+        <p id="resultDetails" class="zatam-game-result-message"></p>
+        <p id="scoreSaveStatus" class="zatam-game-status zatam-game-status-info" hidden></p>
+        <div class="zatam-game-actions">
+          <button id="play-again" class="zatam-game-btn zatam-game-btn-primary" type="button">Play again</button>
+        </div>
+      </section>
+
+      <div id="hintPopup" class="hint-popup zatam-game-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="hint-heading" hidden>
+        <section class="content zatam-game-modal">
           <div class="hint-popup-header">
-            <h2 id="hint-heading">अन्वेषणीयपदानि</h2>
+            <h2 id="hint-heading" class="zatam-game-modal-title">अन्वेषणीयपदानि</h2>
             <button class="hint-close" type="button" data-close-hint aria-label="सूचनां पिधातु">×</button>
           </div>
           <ul id="answers"></ul>

@@ -4,10 +4,16 @@ import {
   toDevanagariNumber,
   verseOffset,
 } from "./game/config.js";
+import {
+  previewWordSearchScore,
+  wordSearchScoreOptions,
+} from "./game/scoring.js";
 import { GameTimer } from "./timer.js";
 
 const TIMER_DURATION_SECONDS = 30;
 const MARKER_CLASS_COUNT = 7;
+const SHARED_SCORE_MODULE_URL = "../../js/game-score.js";
+const SCORE_INITIALIZATION_TIMEOUT_MS = 2500;
 const DIRECTIONS = Object.freeze([
   Object.freeze({ row: 0, column: 1 }),
   Object.freeze({ row: 1, column: 0 }),
@@ -273,12 +279,19 @@ export class WordSearchGame {
     this.elements = {
       grid: documentRef.getElementById("grid"),
       timer: documentRef.getElementById("timer"),
-      lead: documentRef.getElementById("lead"),
       lead2: documentRef.getElementById("lead2"),
       presentCount: documentRef.getElementById("nPresent"),
       foundCount: documentRef.getElementById("nFound"),
-      finishMessage: documentRef.getElementById("finishMessage"),
       statusMessage: documentRef.getElementById("statusMessage"),
+      scoreValue: documentRef.getElementById("scoreValue"),
+      mistakesValue: documentRef.getElementById("mistakesValue"),
+      hintsValue: documentRef.getElementById("hintsValue"),
+      resultPanel: documentRef.getElementById("resultPanel"),
+      resultTitle: documentRef.getElementById("resultTitle"),
+      resultScore: documentRef.getElementById("resultScore"),
+      resultDetails: documentRef.getElementById("resultDetails"),
+      scoreSaveStatus: documentRef.getElementById("scoreSaveStatus"),
+      playAgainButton: documentRef.getElementById("play-again"),
       answers: documentRef.getElementById("answers"),
       hintPopup: documentRef.getElementById("hintPopup"),
       hintButton: documentRef.getElementById("hint-button"),
@@ -295,6 +308,15 @@ export class WordSearchGame {
     this.markerClasses = new Map();
     this.isActive = false;
     this.timer = null;
+    this.mistakes = 0;
+    this.hints = 0;
+    this.hintUsed = false;
+    this.finalScore = null;
+    this.scoreSubmissionStarted = false;
+    this.lastHintFocus = null;
+    this.scoreApi = null;
+    this.scoreApiReady = null;
+    this.runStartedAt = null;
   }
 
   init() {
@@ -302,6 +324,9 @@ export class WordSearchGame {
       return;
     }
 
+    this.bindRestartEvent();
+    this.runStartedAt = Date.now();
+    void this.initializeScoring();
     this.params = normalizePuzzleParams(new URLSearchParams(this.window.location.search));
     const verse = this.getSelectedVerse();
 
@@ -325,7 +350,8 @@ export class WordSearchGame {
     this.createPuzzle(availableWords);
     this.renderAnswerList();
     this.renderScore();
-    this.hideHint();
+    this.hideResult();
+    this.hideHint({ returnFocus: false });
     this.startTimer();
   }
 
@@ -375,12 +401,14 @@ export class WordSearchGame {
     this.document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         this.hideHint();
+      } else if (event.key === "Tab") {
+        this.trapHintFocus(event);
       }
     });
 
     this.elements.refreshButton?.addEventListener("click", (event) => {
       event.preventDefault();
-      this.window.location.reload();
+      this.restartGame();
     });
 
     this.document.querySelectorAll(".difficulty-button[data-size]").forEach((button) => {
@@ -449,8 +477,79 @@ export class WordSearchGame {
       v: String(next.verse),
     });
 
+    this.resetSharedScore();
+
     // Assigning only search also works when the game is opened via file://.
     this.window.location.search = nextQuery.toString();
+  }
+
+  restartGame() {
+    this.resetSharedScore();
+    this.window.location.reload();
+  }
+
+  bindRestartEvent() {
+    this.elements.playAgainButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.restartGame();
+    });
+  }
+
+  initializeScoring() {
+    if (this.scoreApiReady) {
+      return this.scoreApiReady;
+    }
+
+    // Loading the shared scorer dynamically keeps the word-search playable
+    // if Firebase or its CDN is temporarily unavailable.
+    this.scoreApiReady = import(SHARED_SCORE_MODULE_URL)
+      .then((scoreApi) => {
+        scoreApi.initGameScore({
+          gameId: "001-sbg",
+          gameName: "अन्वेषणम्",
+          startedAt: this.runStartedAt,
+        });
+        this.scoreApi = scoreApi;
+        return scoreApi;
+      })
+      .catch((error) => {
+        console.warn("[001-sbg] Shared leaderboard is unavailable:", error);
+        return null;
+      });
+
+    return this.scoreApiReady;
+  }
+
+  resetSharedScore() {
+    this.scoreApi?.resetGameScore();
+  }
+
+  waitForScoreApi() {
+    return new Promise((resolve) => {
+      let settled = false;
+      let timeoutId = null;
+
+      const finish = (scoreApi) => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        if (timeoutId !== null) {
+          this.window.clearTimeout?.(timeoutId);
+        }
+        resolve(scoreApi);
+      };
+
+      timeoutId = this.window.setTimeout(
+        () => finish(null),
+        SCORE_INITIALIZATION_TIMEOUT_MS,
+      );
+
+      this.initializeScoring().then((scoreApi) => {
+        finish(scoreApi);
+      });
+    });
   }
 
   renderVerse(emphasizeAnswerWords) {
@@ -476,7 +575,15 @@ export class WordSearchGame {
 
   createPuzzle(words) {
     const puzzle = buildPuzzle(words, this.params.size, this.params.wordsToFind);
+
     this.placedWords = puzzle.placedWords;
+    this.foundWords.clear();
+    this.markerClasses.clear();
+    this.mistakes = 0;
+    this.hints = 0;
+    this.hintUsed = false;
+    this.finalScore = null;
+    this.scoreSubmissionStarted = false;
     this.isActive = this.placedWords.length > 0;
     this.renderGrid(puzzle.board);
     this.renderVerse(false);
@@ -534,12 +641,93 @@ export class WordSearchGame {
     if (this.elements.foundCount) {
       this.elements.foundCount.textContent = toDevanagariNumber(this.foundWords.size);
     }
-    if (this.elements.finishMessage) {
-      this.elements.finishMessage.hidden = true;
+    if (this.elements.scoreValue) {
+      this.elements.scoreValue.textContent = String(this.getCurrentScore());
     }
-    if (this.elements.statusMessage) {
-      this.elements.statusMessage.hidden = this.foundWords.size === 0;
+    if (this.elements.mistakesValue) {
+      this.elements.mistakesValue.textContent = String(this.mistakes);
     }
+    if (this.elements.hintsValue) {
+      this.elements.hintsValue.textContent = String(this.hints);
+    }
+  }
+
+  getScoreOptions() {
+    return wordSearchScoreOptions({
+      mistakes: this.mistakes,
+      hints: this.hints,
+    });
+  }
+
+  getCurrentScore() {
+    return previewWordSearchScore({
+      mistakes: this.mistakes,
+      hints: this.hints,
+    });
+  }
+
+  getElapsedSeconds() {
+    const remaining = this.timer?.remaining ?? TIMER_DURATION_SECONDS;
+
+    return Math.max(0, TIMER_DURATION_SECONDS - remaining);
+  }
+
+  setGameStatus(message, tone = "info") {
+    const status = this.elements.statusMessage;
+
+    if (!status) {
+      return;
+    }
+
+    if (!message) {
+      status.hidden = true;
+      status.textContent = "";
+      return;
+    }
+
+    status.hidden = false;
+    status.className = `zatam-game-status zatam-game-status-${tone}`;
+    status.textContent = message;
+  }
+
+  setScoreSaveStatus(message, tone = "info") {
+    const status = this.elements.scoreSaveStatus;
+
+    if (!status) {
+      return;
+    }
+
+    status.hidden = !message;
+    status.className = `zatam-game-status zatam-game-status-${tone}`;
+    status.textContent = message ?? "";
+  }
+
+  hideResult() {
+    this.elements.resultPanel?.setAttribute("hidden", "");
+    this.setScoreSaveStatus("");
+  }
+
+  showResult({ title, score, details }) {
+    if (this.elements.resultTitle) {
+      this.elements.resultTitle.textContent = title;
+    }
+    if (this.elements.resultScore) {
+      this.elements.resultScore.textContent = String(score);
+    }
+    if (this.elements.resultDetails) {
+      this.elements.resultDetails.textContent = details;
+    }
+
+    this.elements.resultPanel?.removeAttribute("hidden");
+  }
+
+  resultDetails() {
+    return [
+      `Words found: ${this.foundWords.size}/${this.placedWords.length}`,
+      `Mistakes: ${this.mistakes}`,
+      `Hints: ${this.hints}`,
+      `Time: ${this.getElapsedSeconds()}s`,
+    ].join(" · ");
   }
 
   handleGridClick(event) {
@@ -557,17 +745,38 @@ export class WordSearchGame {
       && !this.foundWords.has(word.word)
     ));
 
-    matchingWords.forEach((word) => this.markWordFound(word));
-
     if (!matchingWords.length) {
+      const clickedKey = cellKey(Number(cell.dataset.row), Number(cell.dataset.column));
+      const isFoundWordStart = this.placedWords.some((word) => (
+        word.start === clickedKey && this.foundWords.has(word.word)
+      ));
+
+      if (!isFoundWordStart) {
+        this.recordMistake(cell);
+      }
+
       return;
     }
+
+    matchingWords.forEach((word) => this.markWordFound(word));
 
     this.renderScore();
 
     if (this.foundWords.size === this.placedWords.length) {
       this.finishGame();
+      return;
     }
+
+    this.setGameStatus("Word found. Keep going!", "success");
+  }
+
+  recordMistake(cell) {
+    this.mistakes += 1;
+    this.renderScore();
+    this.setGameStatus("That is not the first cell of a remaining word. 5 points deducted.", "error");
+
+    cell.classList.add("is-mistake");
+    this.window.setTimeout?.(() => cell.classList.remove("is-mistake"), 500);
   }
 
   markWordFound(word) {
@@ -610,13 +819,73 @@ export class WordSearchGame {
   }
 
   finishGame() {
+    if (!this.isActive) {
+      return;
+    }
+
     this.isActive = false;
     this.timer?.stop();
     this.elements.grid.classList.add("is-complete");
+    this.hideHint({ returnFocus: false });
+    this.finalScore = this.getCurrentScore();
+    this.renderScore();
+    this.setGameStatus("");
+    this.showResult({
+      title: "॥ शुभमस्तु ॥",
+      score: this.finalScore,
+      details: this.resultDetails(),
+    });
+    this.setScoreSaveStatus("Saving your score...", "info");
+    void this.submitCompletedScore();
+  }
 
-    if (this.elements.finishMessage) {
-      this.elements.finishMessage.textContent = "।। शुभमस्तु ।।";
-      this.elements.finishMessage.hidden = false;
+  async submitCompletedScore() {
+    if (this.scoreSubmissionStarted || this.finalScore === null) {
+      return;
+    }
+
+    this.scoreSubmissionStarted = true;
+
+    try {
+      const scoreApi = await this.waitForScoreApi();
+
+      if (!scoreApi) {
+        this.setScoreSaveStatus("The leaderboard is not available right now.", "error");
+        return;
+      }
+
+      this.finalScore = scoreApi.scoreFromPenalties(this.getScoreOptions());
+      this.renderScore();
+      if (this.elements.resultScore) {
+        this.elements.resultScore.textContent = String(this.finalScore);
+      }
+
+      const result = await scoreApi.submitGameScore(this.finalScore, {
+        result: "completed",
+        metrics: {
+          chapter: this.params.chapter,
+          gameTimerSeconds: this.getElapsedSeconds(),
+          gridSize: this.params.size,
+          hints: this.hints,
+          mistakes: this.mistakes,
+          timeRemaining: this.timer?.remaining ?? 0,
+          wordsFound: this.foundWords.size,
+          wordsTotal: this.placedWords.length,
+        },
+      });
+
+      if (result?.ok) {
+        this.setScoreSaveStatus("Score saved to the leaderboard ✓", "success");
+      } else if (result?.reason === "not-signed-in") {
+        this.setScoreSaveStatus("Sign in to save your score to the leaderboard.", "info");
+      } else if (result?.reason === "already-submitted") {
+        this.setScoreSaveStatus("Score already saved ✓", "success");
+      } else {
+        this.setScoreSaveStatus("Your score could not be saved.", "error");
+      }
+    } catch (error) {
+      console.error("[001-sbg] Score submission failed:", error);
+      this.setScoreSaveStatus("The leaderboard score could not be saved.", "error");
     }
   }
 
@@ -628,36 +897,94 @@ export class WordSearchGame {
     this.isActive = false;
     this.elements.grid.classList.add("is-locked");
     this.elements.grid.setAttribute("aria-disabled", "true");
-
-    if (this.elements.finishMessage) {
-      this.elements.finishMessage.textContent = "समयः समाप्तः अस्ति।";
-      this.elements.finishMessage.hidden = false;
+    this.hideHint({ returnFocus: false });
+    this.setGameStatus("");
+    this.finalScore = 0;
+    if (this.elements.scoreValue) {
+      this.elements.scoreValue.textContent = "0";
     }
+    this.showResult({
+      title: "समयः समाप्तः अस्ति।",
+      score: this.finalScore,
+      details: this.resultDetails(),
+    });
+    this.setScoreSaveStatus("Finish a full puzzle to save a score to the leaderboard.", "info");
   }
 
   showHint() {
+    if (!this.isActive) {
+      return;
+    }
+
+    if (!this.hintUsed) {
+      this.hintUsed = true;
+      this.hints += 1;
+      this.renderScore();
+      this.setGameStatus("Hint used. 10 points deducted.", "info");
+    }
+
     this.renderVerse(true);
     if (this.elements.hintPopup) {
+      this.lastHintFocus = this.document.activeElement;
       this.elements.hintPopup.hidden = false;
     }
     this.elements.hintButton?.setAttribute("aria-expanded", "true");
+    this.elements.hintPopup?.querySelector("[data-close-hint]")?.focus();
   }
 
-  hideHint() {
+  hideHint({ returnFocus = true } = {}) {
+    const wasOpen = Boolean(this.elements.hintPopup && !this.elements.hintPopup.hidden);
+
     if (this.elements.hintPopup) {
       this.elements.hintPopup.hidden = true;
     }
     this.elements.hintButton?.setAttribute("aria-expanded", "false");
+
+    if (returnFocus && wasOpen && typeof this.lastHintFocus?.focus === "function") {
+      this.lastHintFocus.focus();
+    }
+
+    this.lastHintFocus = null;
+  }
+
+  trapHintFocus(event) {
+    const popup = this.elements.hintPopup;
+
+    if (!popup || popup.hidden) {
+      return;
+    }
+
+    const focusable = [...popup.querySelectorAll(
+      "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    )];
+
+    if (!focusable.length) {
+      event.preventDefault();
+      return;
+    }
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = this.document.activeElement;
+
+    if (event.shiftKey && (active === first || !popup.contains(active))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (active === last || !popup.contains(active))) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   showSetupError(message) {
     this.isActive = false;
     this.elements.grid.replaceChildren();
-
-    if (this.elements.finishMessage) {
-      this.elements.finishMessage.textContent = message;
-      this.elements.finishMessage.hidden = false;
-    }
+    this.showResult({
+      title: "Unable to start the game",
+      score: 0,
+      details: message,
+    });
+    this.setScoreSaveStatus("");
   }
 }
 
