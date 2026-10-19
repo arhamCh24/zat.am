@@ -102,10 +102,6 @@
 }
 
 @media (max-width: 480px) {
-  .ttt-card {
-    padding: 16px;
-  }
-
   #turn {
     font-size: 1rem;
   }

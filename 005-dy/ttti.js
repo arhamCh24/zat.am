@@ -31,13 +31,14 @@ function initializeBoard(p1, p2) {
   player.innerText = game.player
 
   document.querySelectorAll('.ttt-board td').forEach((cell) => {
-    cell.onclick = (event) => {
+    cell.onclick = () => {
       if (cell.innerText) return
 
       cell.innerText = game.sym
       cell.onclick = undefined
 
-      const [row, col] = cell.classList
+      const row = Number(cell.dataset.row)
+      const col = Number(cell.dataset.col)
       game.turn(row, col)
 
       if (game.hasWinner()) {

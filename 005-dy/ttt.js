@@ -3,13 +3,11 @@ class Game {
     this.p1 = p1
     this.p2 = p2
     this.board = [[null, null, null], [null, null, null], [null, null, null]]
-    //this.player = Math.random() < 0.5 ? this.p1 : this.p2
 	this.player = this.p1
     this.sym = 'x'
   }
 
   turn (row, col) {
-    col = col || row
     this.board[row][col] = this.sym
   }
 
@@ -36,9 +34,8 @@ class Game {
   colWin () {
     let win = false
     for (let c = 0; c < 3; c++) {
-      const col = this.board
-      if (col[0][c] === null) { continue }
-      win = win || (col[0][c] === col[1][c] && col[0][c] === col[2][c])
+      if (this.board[0][c] === null) { continue }
+      win = win || (this.board[0][c] === this.board[1][c] && this.board[0][c] === this.board[2][c])
     }
 
     return win
