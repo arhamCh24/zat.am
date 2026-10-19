@@ -1,30 +1,81 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Weiben - Wheel of fortune</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>राशयः</title>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" href="../shared/game-theme.css" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
 
-  <body data-page="games">
+  <body data-page="games" class="zatam-themed-game zatam-game-page">
 
     <!-- Shared Zat.am Navbar -->
     <div id="navbar-mount"></div>
 
-    <div id="app">
-      <img class="marker" src="marker.png" />
-      <img class="wheel" src="wheel.png" />
-      <button class="button">Spin करोतु !</button>
-      <div class="display">-</div>
-    </div>
+    <main class="zatam-game-shell">
+      <header class="zatam-game-header">
+        <span class="zatam-game-eyebrow">Zodiac Wheel</span>
+        <h1 class="zatam-game-title">राशयः</h1>
+        <p class="zatam-game-subtitle">Match each zodiac symbol to its Sanskrit name.</p>
+      </header>
+
+      <div class="zatam-game-instructions">
+        <p>Spin the wheel and drag the symbol to a name or tap the symbol and then a name.</p>
+      </div>
+
+      <section id="app" class="match-game" aria-label="Sanskrit zodiac matching game">
+        <div class="game-stats zatam-game-stats">
+          <div class="zatam-game-stat zatam-game-score"><span class="zatam-game-stat-label">Score</span><strong id="score-value" class="zatam-game-stat-value">0</strong></div>
+          <div class="zatam-game-stat"><span class="zatam-game-stat-label">Time</span><strong id="time-value" class="zatam-game-stat-value">00:00</strong></div>
+          <div class="zatam-game-stat"><span class="zatam-game-stat-label">Matched</span><strong id="matched-value" class="zatam-game-stat-value">0 / 12</strong></div>
+        </div>
+
+        <div class="game-layout zatam-game-play-area">
+          <section class="wheel-panel" aria-label="Draw a zodiac symbol">
+            <div class="wheel-stage">
+              <img class="marker" src="marker.png" alt="Wheel pointer" />
+              <img class="wheel" src="wheel.png" alt="Wheel showing twelve zodiac symbols" />
+            </div>
+            <button class="button zatam-game-btn zatam-game-btn-primary" type="button">Spin करोतु !</button>
+            <button id="symbol-token" class="symbol-token zatam-game-btn zatam-game-btn-accent" type="button" draggable="false" aria-label="No symbol drawn yet"></button>
+          </section>
+
+          <section class="targets-panel" aria-label="Match each symbol to its Sanskrit zodiac name">
+            <p id="game-status" class="game-status zatam-game-result-message" aria-live="polite">Spin the wheel to draw your first symbol.</p>
+            <div id="targets" class="targets-grid"></div>
+          </section>
+        </div>
+      </section>
+
+      <div id="result-modal" class="zatam-game-modal-backdrop zatam-hidden">
+        <section class="zatam-game-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
+          <h2 id="result-title" class="zatam-game-modal-title">All signs matched!</h2>
+          <p id="final-time" class="zatam-game-result-message"></p>
+          <div class="score-breakdown">
+            <p>Match points <strong id="match-points">+0</strong></p>
+            <p>Time bonus <strong id="time-bonus">+0</strong></p>
+            <p class="score-total">Final score <strong id="final-score">0</strong></p>
+          </div>
+          <div id="score-save-status" class="zatam-game-status zatam-game-status-info" role="status" aria-live="polite">Checking leaderboard...</div>
+          <div class="zatam-game-actions">
+            <button id="new-game" class="zatam-game-btn zatam-game-btn-primary" type="button">Play again</button>
+          </div>
+        </section>
+      </div>
+    </main>
 
     <script src="script.js"></script>
   
 
-    <!-- Shared Zat.am Navbar -->
     <script
       type="module"
       src="../js/navbar-loader.js"
     ></script>
+    <script type="module">
+      import { initGameScore } from "../js/game-score.js";
+
+      initGameScore({ gameId: "010-sw", gameName: "राशयः" });
+    </script>
 </body>
 </html>
