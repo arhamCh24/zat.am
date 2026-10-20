@@ -25,6 +25,7 @@ var scoringModule = null;
 var scoringLoading = null;
 var completedAttempt = null;
 var savingScore = false;
+var sharedRunInitialized = false;
 
 function loadScoring() {
   if (scoringModule) {
@@ -213,15 +214,43 @@ async function submitCompletedScore() {
     timerId = null;
   }
 
-  function startTimer() {
-    stopTimer();
-    startedAt = performance.now();
-    timeElement.textContent = "00:00";
+  async function startTimer() {
+  stopTimer();
 
-    timerId = setInterval(function () {
-      timeElement.textContent = formatTime(elapsedSeconds());
-    }, 250);
+  playing = false;
+  scrambling = true;
+  solveButton.disabled = true;
+  scrambleButton.disabled = true;
+  sharedRunInitialized = false;
+
+  try {
+    var shared = await loadScoring();
+
+    shared.initGameScore({
+      gameId: "027-15s",
+      gameName: "Sliding Number Puzzle"
+    });
+
+    sharedRunInitialized = true;
+  } catch (error) {
+    console.warn(
+      "Leaderboard unavailable. Local play is still available.",
+      error
+    );
   }
+
+  startedAt = performance.now();
+  timeElement.textContent = "00:00";
+
+  scrambling = false;
+  playing = true;
+  solveButton.disabled = false;
+  scrambleButton.disabled = false;
+
+  timerId = setInterval(function () {
+    timeElement.textContent = formatTime(elapsedSeconds());
+  }, 250);
+}
 
   function updateMoves() {
     movesElement.textContent = devanagari(moves);
@@ -362,7 +391,7 @@ function finishGame() {
       0,
       Math.min(100, Math.round(score / startingScore * 100))
     ),
-    initialized: false,
+    initialized: sharedRunInitialized,
     saved: false
   };
 
