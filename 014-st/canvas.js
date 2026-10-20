@@ -5,7 +5,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const getTime = typeof performance === 'function' ? performance.now : Date.now;
+const getTime = () => performance.now();
 const FRAME_THRESHOLD = 300;
 const FRAME_DURATION = 1000 / 58;
 let then = getTime();

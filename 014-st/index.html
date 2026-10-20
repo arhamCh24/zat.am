@@ -33,7 +33,43 @@
     <script type="module" src="/auth/api/middleware.js"></script>
     <canvas id="canvas">Your browser doesn't support HTML5.</canvas>
 
+    <section
+    id="resultPanel"
+    class="typer-result-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="resultTitle"
+    hidden
+  >
+    <div class="typer-result-card">
+      <h2 id="resultTitle">Game Over</h2>
+
+      <p id="resultDetails"></p>
+
+      <div class="typer-result-actions">
+        <button
+          id="submitScoreButton"
+          type="button"
+          class="btn btn-primary"
+        >
+          Submit Score
+        </button>
+
+        <button
+          id="tryAgainButton"
+          type="button"
+          class="btn btn-outline-secondary"
+        >
+          Try Again
+        </button>
+      </div>
+
+      <p id="scoreSaveStatus" role="status"></p>
+    </div>
+  </section>
+
     <!-- Shared Zat.am Navbar -->
     <script type="module" src="../js/navbar-loader.js"></script>
+    <script type="module" src="../js/game-score.js"></script>
   </body>
 </html>
