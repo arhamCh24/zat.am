@@ -47,9 +47,8 @@ document.getElementById('moves').innerHTML=Sanscript.t((moves).toString(),'iast'
 			for(var j = 0; j < 3; j++){
 				var cell = document.createElement('span');
 				cell.id = 'cell-'+i+'-'+j;
-				cell.style.left = (j*80+1*j+1)+'px';
-				cell.style.top = (i*80+1*i+1)+'px';
-				
+				cell.style.left = 'calc(' + (j * 100 / 3) + '% + 2px)';
+				cell.style.top = 'calc(' + (i * 100 / 3) + '% + 2px)';				
 				if(n <= 8){
 					cell.classList.add('number');
 					cell.classList.add((i%2==0 && j%2>0 || i%2>0 && j%2==0) ? 'dark' : 'light');
