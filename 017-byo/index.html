@@ -28,8 +28,6 @@
 	</section>
 	<div id="container">
    <div id="left-column">
-	<img id="random-button" src="img/giphy-wheel.png" onmouseover="this.src='img/giphy-wheel.gif'" onmouseout="this.src='img/giphy-wheel.png'" class="btn" alt="Random combination" />
-	<p id="wrd" aria-live="polite"></p>
 			<div id="left-nav">
 				<div id="btn-top-next" class="btn"><img class="arrow-btn" src="img/btn-next_off.png" /></div>
 				<div id="btn-top-prev" class="btn"><img class="arrow-btn" src="img/btn-prev_off.png" /></div>
@@ -40,6 +38,16 @@
 			</div>
 			<div id="section-edges">
 				<div class="section-edge-line" aria-hidden="true"></div>
+			</div>
+			<div class="below-controls">
+				<div class="primary-controls">
+					<img id="random-button" src="img/giphy-wheel.png" onmouseover="this.src='img/giphy-wheel.gif'" onmouseout="this.src='img/giphy-wheel.png'" class="btn" alt="Random combination" />
+					<p id="wrd" aria-live="polite"></p>
+				</div>
+				<div class="choice-controls">
+					<button id="show-choices" class="zatam-game-btn zatam-game-btn-secondary" type="button">Show choices</button>
+					<select id="set-choice" aria-label="Choose portrait set"></select>
+				</div>
 			</div>
 		</div>
 		<div id="presidents">
@@ -136,11 +144,6 @@
 		<button id="btn-10" class="zatam-game-btn zatam-game-btn-secondary pres-btn" type="button"></button>
 		<button id="btn-11" class="zatam-game-btn zatam-game-btn-secondary pres-btn" type="button"></button>
 		<button id="btn-12" class="zatam-game-btn zatam-game-btn-secondary pres-btn" type="button"></button>
-	</div>
-	<div id="footer">
-		<div id="footer-links">
-			<p>Inspired by Build Your Own President — https://www.idiotsbooks.com/buildyourownpresident/</p>
-		</div>
 	</div>
 	</main>
 

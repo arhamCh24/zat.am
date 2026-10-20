@@ -3,9 +3,9 @@
 `017-byo` is a portrait creator rather than a conventional game. It combines
 the top, middle, and bottom sections of twelve portraits so you can make a
 mixed portrait. Use the arrows beside each section to change it independently
-or use the wheel for a random combination. The numbered portrait choices are
-hidden by default. [View them here](https://zat.am/017-byo/?h=0); selecting a
-number matches all three sections.
+or use the wheel for a random combination. Use the **Show choices** button to
+reveal the numbered portrait choices; selecting a number matches all three
+sections. The dropdown selects which portrait data set to use.
 
 When all three portrait sections match, the page shows the corresponding
 Sanskrit label and its transliteration.
@@ -23,5 +23,7 @@ Sanskrit label and its transliteration.
 ## Responsive layout
 
 On wide screens, the portrait and controls sit side by side. On narrow screens,
-the portrait scales to the available width, with the wheel, section controls,
-and portrait choices arranged beneath it.
+the portrait scales to the available width and the six section controls stay
+beside it. At medium widths, the random control, result label, choice toggle,
+and set selector share one row; at small widths, they wrap into two rows above
+the portrait choices.

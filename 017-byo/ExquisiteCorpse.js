@@ -1,7 +1,10 @@
 const urlParams = new URLSearchParams(window.location.search);
+var setCount = Math.min(wlist.length, ilist.length);
 var set = urlParams.get('s');
-if (!set || isNaN(set) || set>=wlist.length)
+if (!set || !Number.isInteger(Number(set)) || Number(set) < 0 || Number(set) >= setCount)
 	set=0;
+else
+	set=Number(set);
 var t = urlParams.get('t');
 if (!t || isNaN(t))
 	t=1;
@@ -12,6 +15,14 @@ var imgs = ilist[parseInt(set)];
 var words=wlist[parseInt(set)];
 
 $(function(){
+	let choicesVisible = Number(h) === 0;
+	const choiceButtons = $('#pres-btns');
+	const choicesToggle = $('#show-choices');
+	const setChoice = $('#set-choice');
+	for (let index = 0; index < setCount; index++) {
+		setChoice.append(new Option(String(index), String(index)));
+	}
+	setChoice.val(String(set));
 	
 	[
 		['#btn-top-next', topNext],
@@ -25,6 +36,20 @@ $(function(){
 	$('.pres-btn').each(function () {
 		const sectionId = Number(this.id.slice('btn-'.length));
 		$(this).click(function () { selectEC(sectionId, this); });
+	});
+	choicesToggle.click(function () {
+		choicesVisible = !choicesVisible;
+		choiceButtons.toggle(choicesVisible);
+		choicesToggle.text(choicesVisible ? 'Hide choices' : 'Show choices');
+
+		const url = new URL(window.location.href);
+		url.searchParams.set('h', choicesVisible ? '0' : '1');
+		window.history.replaceState(null, '', url.href);
+	});
+	setChoice.change(function () {
+		const url = new URL(window.location.href);
+		url.searchParams.set('s', this.value);
+		window.location.assign(url.href);
 	});
 
 	$('.arrow-btn').hover(
@@ -171,5 +196,6 @@ for (let i = 1; i <= 12; i++) {
 	document.querySelector(`.bottom${i}`).style.backgroundImage = imageUrl;
 	document.getElementById(`btn-${i}`).innerHTML = words[i - 1];
 }
-	if (h != 0) $("#pres-btns").hide();
+	choiceButtons.toggle(choicesVisible);
+	choicesToggle.text(choicesVisible ? 'Hide choices' : 'Show choices');
 });
