@@ -1,63 +1,52 @@
-// Immediately invoked function expression
-// to not pollute the global scope
-(function() {
+(() => {
   const wheel = document.querySelector('.wheel');
-  const startButton = document.querySelector('.button');
-  const display = document.querySelector('.display');
-  
-  let deg = 0;
-  let zoneSize = 30; // deg
+  const spinButton = document.querySelector('#spin-button');
+  const drawnSign = document.querySelector('#drawn-sign');
 
-  // Counter clockwise
-  const symbolSegments = {
-    1: "मिथुनम् - mithunam",
-    2: "वृषभः - vRRiShabhaH",
-    3: "मेषः - meShaH",
-    4: "मीनः - miinaH",
-    5: "कुम्भः - kumbhaH",
-    6: "मकरः - makaraH",
-    7: "धनुः - dhanuH",
-    8: "वृश्चिकः - vRRishchikaH",
-	9: "तुला - tulaa",
-	10: "कन्या - kanyaa",
-	11: "सिंहः - siMhaH",
-    12: "कर्कटः - karkaTaH"
-  }
+  const signs = [
+    { devanagari: 'मेषः', transliteration: 'meShaH', wheelIndex: 3 },
+    { devanagari: 'वृषभः', transliteration: 'vRRiShabhaH', wheelIndex: 2 },
+    { devanagari: 'मिथुनम्', transliteration: 'mithunam', wheelIndex: 1 },
+    { devanagari: 'कर्कटः', transliteration: 'karkaTaH', wheelIndex: 12 },
+    { devanagari: 'सिंहः', transliteration: 'siMhaH', wheelIndex: 11 },
+    { devanagari: 'कन्या', transliteration: 'kanyaa', wheelIndex: 10 },
+    { devanagari: 'तुला', transliteration: 'tulaa', wheelIndex: 9 },
+    { devanagari: 'वृश्चिकः', transliteration: 'vRRishchikaH', wheelIndex: 8 },
+    { devanagari: 'धनुः', transliteration: 'dhanuH', wheelIndex: 7 },
+    { devanagari: 'मकरः', transliteration: 'makaraH', wheelIndex: 6 },
+    { devanagari: 'कुम्भः', transliteration: 'kumbhaH', wheelIndex: 5 },
+    { devanagari: 'मीनः', transliteration: 'miinaH', wheelIndex: 4 },
+  ];
 
-  const handleWin = (actualDeg) => {
-    const winningSymbolNr = Math.ceil(actualDeg / zoneSize);
-    display.innerHTML = symbolSegments[winningSymbolNr];
-  }
+  let wheelRotation = 0;
+  let spinning = false;
 
-  startButton.addEventListener('click', () => {
-    // Reset display
-    display.innerHTML = "-";
-    // Disable button during spin
-    startButton.style.pointerEvents = 'none';
-    // Calculate a new rotation between 2000 and 5000
-    deg = Math.floor(2000 + Math.random() * 3000);
-    // Set the transition on the wheel
-    wheel.style.transition = 'all 5s ease-out';
-    // Rotate the wheel
-    wheel.style.transform = `rotate(${deg}deg)`;
-    // Apply the blur
+  function spin() {
+    if (spinning) return;
+
+    const sign = signs[Math.floor(Math.random() * signs.length)];
+    const targetAngle = (sign.wheelIndex % 12) * 30;
+    const currentAngle = wheelRotation % 360;
+    const alignment = (targetAngle - currentAngle + 360) % 360;
+    wheelRotation += 5 * 360 + alignment;
+    spinning = true;
+    spinButton.disabled = true;
+    drawnSign.textContent = '';
+    wheel.style.transition = 'transform 1.5s cubic-bezier(0.12, 0.72, 0.16, 1)';
     wheel.classList.add('blur');
-  });
+    wheel.style.transform = `rotate(${wheelRotation}deg)`;
 
-  wheel.addEventListener('transitionend', () => {
-    // Remove blur
-    wheel.classList.remove('blur');
-    // Enable button when spin is over
-    startButton.style.pointerEvents = 'auto';
-    // Need to set transition to none as we want to rotate instantly
-    wheel.style.transition = 'none';
-    // Calculate degree on a 360 degree basis to get the "natural" real rotation
-    // Important because we want to start the next spin from that one
-    // Use modulus to get the rest value
-    const actualDeg = deg % 360;
-    // Set the real rotation instantly without animation
-    wheel.style.transform = `rotate(${actualDeg}deg)`;
-    // Calculate and display the winning symbol
-    handleWin(actualDeg);
-  });
+    wheel.addEventListener('transitionend', function onSpinEnd(event) {
+      if (event.propertyName !== 'transform') return;
+      wheel.removeEventListener('transitionend', onSpinEnd);
+      wheel.style.transition = 'none';
+      wheel.style.transform = `rotate(${wheelRotation}deg)`;
+      wheel.classList.remove('blur');
+      drawnSign.textContent = `${sign.devanagari} - ${sign.transliteration}`;
+      spinning = false;
+      spinButton.disabled = false;
+    });
+  }
+
+  spinButton.addEventListener('click', spin);
 })();

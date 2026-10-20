@@ -2,48 +2,65 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>द्वन्द्वयुद्धम् dvandvayuddham - x/☺ </title>
+    <title>द्वन्द्वयुद्धम् dvandvayuddham - x/☺</title>
 
-    <link href="ttt.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="../shared/game-theme.css">
+    <link rel="stylesheet" href="ttt.css">
     <script src="ttt.js"></script>
-	<script src="ttti.js"></script>
+    <script src="ttti.js"></script>
   </head>
-  <body data-page="games">
+  <body data-page="games" class="zatam-themed-game zatam-game-page">
 
-    <!-- Shared Zat.am Navbar -->
     <div id="navbar-mount"></div>
 
-    <div id="app">
-      <div>
-        <h2 id="turn">कस्य kasya पर्यायः paryaayaH ? - <span id="player"></span> !</h2>
-      </div>
-      <table>
-        <tr"0">
-          <td class="0 0"></td>
-          <td class="0 1"></td>
-          <td class="0 2"></td>
-        </tr>
-        <tr>
-          <td class="1 0"></td>
-          <td class="1 1"></td>
-          <td class="1 2"></td>
-        </tr>
-        <tr>
-          <td class="2 0"></td>
-          <td class="2 1"></td>
-          <td class="2 2"></td>
-        </tr>
-      </table>
-	   <h1 id="jayaH"></h1>
-    </div>
-  
+    <main class="zatam-game-shell">
+      <section class="zatam-game-header">
+        <span class="zatam-game-eyebrow">Two-player game</span>
+        <h1 class="zatam-game-title">द्वन्द्वयुद्धम्</h1>
+        <p class="zatam-game-subtitle">Tic-tac-toe for two players</p>
+      </section>
+      <section class="zatam-game-play-area ttt-card" aria-label="Tic-tac-toe game">
+        <h2 id="turn" class="zatam-game-section-title">कस्य kasya पर्यायः paryaayaH ? - <span id="player"></span> !</h2>
+        <table class="ttt-board" aria-label="Tic-tac-toe board">
+          <tbody>
+            <tr>
+              <td data-row="0" data-col="0"></td>
+              <td data-row="0" data-col="1"></td>
+              <td data-row="0" data-col="2"></td>
+            </tr>
+            <tr>
+              <td data-row="1" data-col="0"></td>
+              <td data-row="1" data-col="1"></td>
+              <td data-row="1" data-col="2"></td>
+            </tr>
+            <tr>
+              <td data-row="2" data-col="0"></td>
+              <td data-row="2" data-col="1"></td>
+              <td data-row="2" data-col="2"></td>
+            </tr>
+          </tbody>
+        </table>
+        <h2 id="jayaH" aria-live="polite"></h2>
+      </section>
+    </main>
 
-    <!-- Shared Zat.am Navbar -->
-    <script
-      type="module"
-      src="../js/navbar-loader.js"
-    ></script>
-</body>
+    <div id="name-dialog-backdrop" class="zatam-game-modal-backdrop ttt-name-backdrop">
+      <form id="name-dialog" class="zatam-game-modal ttt-name-dialog" aria-labelledby="name-dialog-title">
+        <h2 id="name-dialog-title" class="zatam-game-modal-title">नामानि लिखताम्</h2>
+        <p class="ttt-name-instructions">Enter a name for each player to begin.</p>
+        <label class="ttt-name-field" for="player-one-name">Player 1 <span>(x)</span>
+          <input id="player-one-name" name="playerOne" type="text" value="प्रथमः" maxlength="30" required autocomplete="off">
+        </label>
+        <label class="ttt-name-field" for="player-two-name">Player 2 <span>(☺)</span>
+          <input id="player-two-name" name="playerTwo" type="text" value="द्वितीयः" maxlength="30" required autocomplete="off">
+        </label>
+        <p id="name-dialog-error" class="zatam-game-status zatam-game-status-error ttt-name-error" role="alert" hidden>Please enter a different name for each player.</p>
+        <div class="zatam-game-actions">
+          <button type="submit" class="zatam-game-btn zatam-game-btn-primary">Start game</button>
+        </div>
+      </form>
+    </div>
+    <script type="module" src="../js/navbar-loader.js"></script>
+  </body>
 </html>
