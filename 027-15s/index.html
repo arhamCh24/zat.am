@@ -6,7 +6,7 @@
   <title>१५ समस्या - 15 Puzzle</title>
 
   <link rel="stylesheet" href="../shared/game-theme.css">
-  <link rel="stylesheet" href="15-puzzle.css">
+  <link rel="stylesheet" href="puzzle.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@sanskrit-coders/sanscript@1.1.0/sanscript.min.js"></script>
 </head>
@@ -16,7 +16,7 @@
 
   <main class="sliding-game">
     <header class="sliding-header">
-      <h1>१५ समस्या</h1>
+      <h1 id="puzzle-title">१५ समस्या</h1>
       <p>Arrange the Sanskrit numbers in order.</p>
     </header>
 
@@ -24,6 +24,10 @@
       <section class="board-panel" aria-label="Sliding puzzle">
         <div class="moves-display" aria-live="polite">
           Moves: <strong id="moves">०</strong>
+        </div>
+
+        <div class="timer-display">
+          Time: <strong id="puzzle-time">00:00</strong>
         </div>
 
         <div id="puzzle" aria-label="Number puzzle board"></div>
@@ -45,18 +49,28 @@
             <li>Leave the empty space in the bottom-right corner.</li>
           </ol>
 
+          <p>Hover over a tile to see its number in English digits.</p>
+
           <p>
-            Hover over a tile to see its number in English digits.
+            The timer starts after scrambling. Finish faster to earn
+            more points. Your time, moves, and score appear when you
+            complete the puzzle.
           </p>
 
           <p>
-            <strong>Solve</strong> displays the completed arrangement.
+            <strong>Solve</strong> displays the completed arrangement
+            and ends the attempt without awarding points.
+          </p>
+
+          <p>
+            Sign in to Zat.am to save a completed game’s score
+            to the leaderboard.
           </p>
         </div>
 
         <nav class="puzzle-options" aria-label="Puzzle size">
-          <a href="index8.html">8 Puzzle · 3 × 3</a>
-          <a href="index.html" aria-current="page">15 Puzzle · 4 × 4</a>
+          <a id="option-3" href="index.html?size=3">8 Puzzle · 3 × 3</a>
+          <a id="option-4" href="index.html?size=4">15 Puzzle · 4 × 4</a>
         </nav>
       </aside>
     </div>
@@ -66,7 +80,40 @@
     </footer>
   </main>
 
-  <script src="15-puzzle.js"></script>
+  <dialog class="puzzle-result" aria-labelledby="puzzle-result-title">
+    <div class="puzzle-result-content">
+      <h2 id="puzzle-result-title">उत्तमम्!</h2>
+      <p>You completed the puzzle.</p>
+
+      <dl class="puzzle-result-stats">
+        <div>
+          <dt>Time</dt>
+          <dd id="result-time"></dd>
+        </div>
+        <div>
+          <dt>Moves</dt>
+          <dd id="result-moves"></dd>
+        </div>
+        <div>
+          <dt>Final score</dt>
+          <dd id="result-score"></dd>
+        </div>
+      </dl>
+
+      <div class="puzzle-result-actions">
+        <button type="button" id="result-replay">Play again</button>
+        <button type="button" id="result-close">Close</button>
+      </div>
+
+      <p id="score-status" role="status"></p>
+
+      <button type="button" id="retry-score" hidden>
+        Retry score submission
+      </button>
+    </div>
+  </dialog>
+
+  <script src="puzzle.js"></script>
   <script type="module" src="../js/navbar-loader.js"></script>
 </body>
 </html>

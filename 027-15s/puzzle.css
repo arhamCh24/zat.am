@@ -7,7 +7,9 @@
 }
 
 .sliding-game,
-.sliding-game * {
+.sliding-game *,
+.puzzle-result,
+.puzzle-result * {
   box-sizing: border-box;
 }
 
@@ -52,6 +54,18 @@
 .sliding-game .moves-display strong {
   color: #17324d;
   font-size: 24px;
+}
+
+.sliding-game .timer-display {
+  margin: -8px 0 20px;
+  color: #526578;
+  text-align: center;
+  font-size: 16px;
+}
+
+.sliding-game .timer-display strong {
+  color: #17324d;
+  font-variant-numeric: tabular-nums;
 }
 
 .sliding-game #puzzle {
@@ -135,9 +149,16 @@
   color: #fff;
 }
 
+.sliding-game #controls button:disabled,
+.puzzle-result button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
 .sliding-game button:focus-visible,
 .sliding-game a:focus-visible,
-.sliding-game .instructions-content:focus-visible {
+.sliding-game .instructions-content:focus-visible,
+.puzzle-result button:focus-visible {
   outline: 3px solid #e4a527;
   outline-offset: 4px;
 }
@@ -199,43 +220,6 @@
   line-height: 1.6;
 }
 
-@media (max-width: 760px) {
-  .sliding-game .sliding-layout {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .sliding-game .board-panel,
-  .sliding-game .instructions-panel {
-    padding: 20px;
-  }
-
-  .sliding-game .instructions-content {
-    max-height: 220px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sliding-game #puzzle.animate span {
-    transition: none;
-  }
-}.sliding-game .timer-display {
-  margin: -8px 0 20px;
-  color: #526578;
-  text-align: center;
-  font-size: 16px;
-}
-
-.sliding-game .timer-display strong {
-  color: #17324d;
-  font-variant-numeric: tabular-nums;
-}
-
-.sliding-game #controls button:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
 dialog.puzzle-result {
   width: min(440px, calc(100% - 32px));
   max-height: calc(100dvh - 32px);
@@ -247,7 +231,6 @@ dialog.puzzle-result {
   background: #fff;
   color: #17324d;
   font-family: Arial, sans-serif;
-  box-sizing: border-box;
   box-shadow: 0 20px 70px rgb(0 0 0 / 25%);
 }
 
@@ -318,7 +301,32 @@ dialog.puzzle-result::backdrop {
   color: #2463a6;
 }
 
-.puzzle-result button:focus-visible {
-  outline: 3px solid #e4a527;
-  outline-offset: 3px;
+.puzzle-result #score-status {
+  margin-top: 16px;
+}
+
+.puzzle-result #retry-score {
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .sliding-game .sliding-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .sliding-game .board-panel,
+  .sliding-game .instructions-panel {
+    padding: 20px;
+  }
+
+  .sliding-game .instructions-content {
+    max-height: 220px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sliding-game #puzzle.animate span {
+    transition: none;
+  }
 }
