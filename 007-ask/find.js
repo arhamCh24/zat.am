@@ -38,7 +38,7 @@ var drawGrid = function () {
   var rowIdx = 0;
   var colIdx = 0;
   for (rowIdx = 0; rowIdx < N_ROWS; rowIdx++) {
-    var row = $('<tr id="tblRow_"' + rowIdx + '"></tr>');
+var row = $('<tr id="tblRow_' + rowIdx + '"></tr>');
     for (colIdx = 0; colIdx < N_COLS; colIdx++) {
       var cell = $('<td id="tblCell_' + rowIdx + "_" + colIdx + '"></td>');
       row.append(cell);
@@ -479,14 +479,20 @@ var getRandomAkshara = function () {
   return akshara;
 };
 var resizeGrid = function () {
-  var width = $(window).width();
-  var height = $(window).height();
-  var minDim = width;
-  if (minDim > height) {
-    minDim = height;
-  }
-  $("#grid").width(minDim * 0.85);
-  $("#grid").height(minDim * 0.85);
+  var parent = document.getElementById("gridParent");
+  var grid = document.getElementById("grid");
+
+  if (!parent || !grid) return;
+
+  var width = Math.min(parent.clientWidth, 720);
+
+  $("#grid").width(width);
+  $("#grid").height(width);
+
+  var cellWidth = width / N_COLS;
+  var fontSize = Math.max(10, Math.min(38, cellWidth * 0.55));
+
+  grid.style.setProperty("--ask-cell-font", fontSize + "px");
 };
 $(window).resize(resizeGrid);
 $(document).ready(main);
