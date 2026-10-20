@@ -1,239 +1,476 @@
 /**
- * 15-puzzle.js
- *
+ * Based on the sliding puzzle by Arnis Ritins.
  * Copyright (c) 2015 Arnis Ritins
- * Released under the MIT license
+ * Released under the MIT license.
  */
-(function(){
-	var moves=0;
-	var state = 1;
-	var puzzle = document.getElementById('puzzle');
-document.getElementById('moves').innerHTML=Sanscript.t((moves).toString(),'iast', 'devanagari');
-	// Creates solved puzzle
-	solve();
-	
-	// Listens for click on puzzle cells
-	puzzle.addEventListener('click', function(e){
-		if(state == 1){
-			moves++;
-			document.getElementById('moves').innerHTML=Sanscript.t((moves).toString(),'iast', 'devanagari');
-			// Enables sliding animation
-			puzzle.className = 'animate';
-			shiftCell(e.target);
-		}
-	});
-	
-	// Listens for click on control buttons
-	document.getElementById('solve').addEventListener('click', solve);
-	document.getElementById('scramble').addEventListener('click', scramble);
+(function () {
+  "use strict";
 
-	/**
-	 * Creates solved puzzle
-	 *
-	 */
-	function solve(){
-		
-		if(state == 0){
-			return;
-		}
-		
-		puzzle.innerHTML = '';
-		
-		var n = 1;
-		for(var i = 0; i <= 3; i++){
-			for(var j = 0; j <= 3; j++){
-				var cell = document.createElement('span');
-				cell.id = 'cell-'+i+'-'+j;
-				cell.style.left = 'calc(' + (j * 100 / 4) + '% + 2px)';
-				cell.style.top = 'calc(' + (i * 100 / 4) + '% + 2px)';				
-				if(n <= 15){
-					cell.classList.add('number');
-					cell.classList.add((i%2==0 && j%2>0 || i%2>0 && j%2==0) ? 'dark' : 'light');
-					cellnum=n++;
-					cell.title = (cellnum).toString();
-					cell.innerHTML = Sanscript.t((cellnum).toString(),'iast', 'devanagari');
-//					cell.innerHTML = (n++).toString();
-//
-				} else {
-					cell.className = 'empty';
-				}
-				
-				puzzle.appendChild(cell);
-			}
-		}
-		
-	}
+  var script = document.currentScript;
+  var size = /\/8-puzzle\.js(?:[?#]|$)/.test(script.src) ? 3 : 4;
+  var total = size * size;
+  var startingScore = size === 3 ? 1000 : 2000;
 
-	/**
-	 * Shifts number cell to the empty cell
-	 * 
-	 */
-	function shiftCell(cell){
-		
-		// Checks if selected cell has number
-		if(cell.clasName != 'empty'){
-			
-			// Tries to get empty adjacent cell
-			var emptyCell = getEmptyAdjacentCell(cell);
-			
-			if(emptyCell){
-				// Temporary data
-				var tmp = {style: cell.style.cssText, id: cell.id};
-				
-				// Exchanges id and style values
-				cell.style.cssText = emptyCell.style.cssText;
-				cell.id = emptyCell.id;
-				emptyCell.style.cssText = tmp.style;
-				emptyCell.id = tmp.id;
-				
-				if(state == 1){
-					// Checks the order of numbers
-					checkOrder();
-				}
-			}
-		}
-		
-	}
+  var puzzle = document.getElementById("puzzle");
+  var movesElement = document.getElementById("moves");
+  var solveButton = document.getElementById("solve");
+  var scrambleButton = document.getElementById("scramble");
 
-	/**
-	 * Gets specific cell by row and column
-	 *
-	 */
-	function getCell(row, col){
-	
-		return document.getElementById('cell-'+row+'-'+col);
-		
-	}
+  var moves = 0;
+  var scrambling = false;
+  var playing = false;
+  var startedAt = 0;
+  var timerId = null;
+var scoringModule = null;
+var scoringLoading = null;
+var completedAttempt = null;
+var savingScore = false;
 
-	/**
-	 * Gets empty cell
-	 *
-	 */
-	function getEmptyCell(){
-	
-		return puzzle.querySelector('.empty');
-			
-	}
-	
-	/**
-	 * Gets empty adjacent cell if it exists
-	 *
-	 */
-	function getEmptyAdjacentCell(cell){
-		
-		// Gets all adjacent cells
-		var adjacent = getAdjacentCells(cell);
-		
-		// Searches for empty cell
-		for(var i = 0; i < adjacent.length; i++){
-			if(adjacent[i].className == 'empty'){
-				return adjacent[i];
-			}
-		}
-		
-		// Empty adjacent cell was not found
-		return false;
-		
-	}
+function loadScoring() {
+  if (scoringModule) {
+    return Promise.resolve(scoringModule);
+  }
 
-	/**
-	 * Gets all adjacent cells
-	 *
-	 */
-	function getAdjacentCells(cell){
-		
-		var id = cell.id.split('-');
-		
-		// Gets cell position indexes
-		var row = parseInt(id[1]);
-		var col = parseInt(id[2]);
-		
-		var adjacent = [];
-		
-		// Gets all possible adjacent cells
-		if(row < 3){adjacent.push(getCell(row+1, col));}			
-		if(row > 0){adjacent.push(getCell(row-1, col));}
-		if(col < 3){adjacent.push(getCell(row, col+1));}
-		if(col > 0){adjacent.push(getCell(row, col-1));}
-		
-		return adjacent;
-		
-	}
-	
-	/**
-	 * Chechs if the order of numbers is correct
-	 *
-	 */
-	function checkOrder(){
-		
-		// Checks if the empty cell is in correct position
-		if(getCell(3, 3).className != 'empty'){
-			return;
-		}
-	
-		var n = 1;
-		// Goes through all cells and checks numbers
-		for(var i = 0; i <= 3; i++){
-			for(var j = 0; j <= 3; j++){
-				if(n <= 15 && getCell(i, j).innerHTML != Sanscript.t(n.toString(),'iast', 'devanagari')){
-					// Order is not correct
-					return;
-				}
-				n++;
-			}
-		}
-		
-		// Puzzle is solved, offers to scramble it
-		alert('उत्तमम् !  You did it in '+ Sanscript.t(moves.toString(),'iast', 'devanagari') +' moves ! \nClick "Scramble" to try the puzzle पुनः ');
-	
-	}
+  if (!scoringLoading) {
+    scoringLoading = import("../js/game-score.js")
+      .then(function (module) {
+        scoringModule = module;
+        return module;
+      })
+      .catch(function (error) {
+        scoringLoading = null;
+        throw error;
+      });
+  }
 
-	/**
-	 * Scrambles puzzle
-	 *
-	 */
-	function scramble(){
-	moves=0;
-	document.getElementById('moves').innerHTML=Sanscript.t((moves).toString(),'iast', 'devanagari');
-		if(state == 0){
-			return;
-		}
-		
-		puzzle.removeAttribute('class');
-		state = 0;
-		
-		var previousCell;
-		var i = 1;
-		var interval = setInterval(function(){
-			if(i <= 100){
-				var adjacent = getAdjacentCells(getEmptyCell());
-				if(previousCell){
-					for(var j = adjacent.length-1; j >= 0; j--){
-						if(adjacent[j].innerHTML == previousCell.innerHTML){
-							adjacent.splice(j, 1);
-						}
-					}
-				}
-				// Gets random adjacent cell and memorizes it for the next iteration
-				previousCell = adjacent[rand(0, adjacent.length-1)];
-				shiftCell(previousCell);
-				i++;
-			} else {
-				clearInterval(interval);
-				state = 1;
-			}
-		}, 5);
+  return scoringLoading;
+}
+  function devanagari(value) {
+    return Sanscript.t(String(value), "iast", "devanagari");
+  }
 
-	}
-	
-	/**
-	 * Generates random number
-	 *
-	 */
-	function rand(from, to){
-//xy=Math.floor(Math.random() * (to - from + 1)) + from;
-	//	return Sanscript.t(String(xy),'iast', 'devanagari');
-return Math.floor(Math.random() * (to - from + 1)) + from;
-	}
+  /* Add the timer beside the existing move counter. */
+  var timerDisplay = document.createElement("div");
+  timerDisplay.className = "timer-display";
+  timerDisplay.innerHTML =
+    'Time: <strong id="puzzle-time">00:00</strong>';
 
+  movesElement.parentElement.insertAdjacentElement(
+    "afterend",
+    timerDisplay
+  );
+
+  var timeElement = document.getElementById("puzzle-time");
+
+  /* Completion popup stays outside the page layout. */
+  var dialog = document.createElement("dialog");
+  dialog.className = "puzzle-result";
+  dialog.setAttribute("aria-labelledby", "puzzle-result-title");
+
+  dialog.innerHTML = `
+    <div class="puzzle-result-content">
+      <h2 id="puzzle-result-title">उत्तमम्!</h2>
+      <p>You completed the puzzle.</p>
+
+      <dl class="puzzle-result-stats">
+        <div>
+          <dt>Time</dt>
+          <dd id="result-time"></dd>
+        </div>
+        <div>
+          <dt>Moves</dt>
+          <dd id="result-moves"></dd>
+        </div>
+        <div>
+          <dt>Final score</dt>
+          <dd id="result-score"></dd>
+        </div>
+      </dl>
+
+      <div class="puzzle-result-actions">
+        <button type="button" id="result-replay">Play again</button>
+        <button type="button" id="result-close">Close</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(dialog);
+var scoreStatus = document.createElement("p");
+scoreStatus.setAttribute("role", "status");
+scoreStatus.style.marginTop = "16px";
+
+var retryScoreButton = document.createElement("button");
+retryScoreButton.type = "button";
+retryScoreButton.textContent = "Retry score submission";
+retryScoreButton.hidden = true;
+retryScoreButton.style.marginTop = "12px";
+
+dialog.querySelector(".puzzle-result-content").append(
+  scoreStatus,
+  retryScoreButton
+);
+
+retryScoreButton.addEventListener("click", submitCompletedScore);
+
+async function submitCompletedScore() {
+  var attempt = completedAttempt;
+
+  if (!attempt || attempt.saved || savingScore) return;
+
+  savingScore = true;
+  retryScoreButton.hidden = true;
+  scoreStatus.textContent = "Saving your leaderboard score…";
+
+  solveButton.disabled = true;
+  scrambleButton.disabled = true;
+  document.getElementById("result-replay").disabled = true;
+
+  try {
+    var shared = await loadScoring();
+
+    if (!attempt.initialized) {
+      shared.initGameScore({
+        gameId: "027-15s",
+        gameName: "Sliding Number Puzzle"
+      });
+
+      attempt.initialized = true;
+    }
+
+    var result = await shared.submitGameScore(
+      attempt.leaderboardScore,
+      {
+        result: "completed",
+        metrics: {
+          puzzleSize: size,
+          puzzleType: size === 3 ? "8-puzzle" : "15-puzzle",
+          moves: attempt.moves,
+          elapsedSeconds: attempt.seconds,
+          rawScore: attempt.rawScore,
+          maximumScore: startingScore
+        }
+      }
+    );
+
+    if (result.ok || result.reason === "already-submitted") {
+      attempt.saved = true;
+
+      scoreStatus.textContent =
+        "Leaderboard score saved: " +
+        attempt.leaderboardScore +
+        "/100.";
+    } else {
+      scoreStatus.textContent =
+        result.reason === "not-signed-in"
+          ? "Sign in to Zat.am, then retry to save this score."
+          : "Score was not saved. Please retry.";
+
+      retryScoreButton.hidden = false;
+    }
+  } catch (error) {
+    console.warn("Puzzle score submission failed.", error);
+
+    scoreStatus.textContent =
+      "Could not save your score. Check your connection and retry.";
+
+    retryScoreButton.hidden = false;
+  } finally {
+    savingScore = false;
+    solveButton.disabled = false;
+    scrambleButton.disabled = false;
+    document.getElementById("result-replay").disabled = false;
+  }
+}
+  document.getElementById("result-close").addEventListener(
+    "click",
+    function () {
+      dialog.close();
+    }
+  );
+
+  document.getElementById("result-replay").addEventListener(
+    "click",
+    function () {
+      dialog.close();
+      scramble();
+    }
+  );
+
+  function formatTime(seconds) {
+    return (
+      String(Math.floor(seconds / 60)).padStart(2, "0") +
+      ":" +
+      String(seconds % 60).padStart(2, "0")
+    );
+  }
+
+  function elapsedSeconds() {
+    return Math.floor((performance.now() - startedAt) / 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerId);
+    timerId = null;
+  }
+
+  function startTimer() {
+    stopTimer();
+    startedAt = performance.now();
+    timeElement.textContent = "00:00";
+
+    timerId = setInterval(function () {
+      timeElement.textContent = formatTime(elapsedSeconds());
+    }, 250);
+  }
+
+  function updateMoves() {
+    movesElement.textContent = devanagari(moves);
+  }
+
+  function getCell(row, col) {
+    return document.getElementById("cell-" + row + "-" + col);
+  }
+
+  function getEmptyCell() {
+    return puzzle.querySelector(".empty");
+  }
+
+  function getAdjacentCells(cell) {
+    var parts = cell.id.split("-");
+    var row = Number(parts[1]);
+    var col = Number(parts[2]);
+    var adjacent = [];
+
+    if (row < size - 1) adjacent.push(getCell(row + 1, col));
+    if (row > 0) adjacent.push(getCell(row - 1, col));
+    if (col < size - 1) adjacent.push(getCell(row, col + 1));
+    if (col > 0) adjacent.push(getCell(row, col - 1));
+
+    return adjacent;
+  }
+
+  function getEmptyAdjacentCell(cell) {
+    return getAdjacentCells(cell).find(function (adjacent) {
+      return adjacent.classList.contains("empty");
+    });
+  }
+
+  function createSolvedBoard() {
+    puzzle.innerHTML = "";
+    puzzle.classList.remove("animate");
+
+    var number = 1;
+
+    for (var row = 0; row < size; row++) {
+      for (var col = 0; col < size; col++) {
+        var cell = document.createElement("span");
+
+        cell.id = "cell-" + row + "-" + col;
+        cell.style.left =
+          "calc(" + (col * 100 / size) + "% + 2px)";
+        cell.style.top =
+          "calc(" + (row * 100 / size) + "% + 2px)";
+
+        if (number < total) {
+          cell.classList.add(
+            "number",
+            (row + col) % 2 ? "dark" : "light"
+          );
+
+          cell.dataset.number = String(number);
+          cell.title = String(number);
+          cell.textContent = devanagari(number);
+          number++;
+        } else {
+          cell.className = "empty";
+        }
+
+        puzzle.appendChild(cell);
+      }
+    }
+  }
+
+  function shiftCell(cell) {
+    if (!cell || !cell.classList.contains("number")) {
+      return false;
+    }
+
+    var emptyCell = getEmptyAdjacentCell(cell);
+
+    if (!emptyCell) {
+      return false;
+    }
+
+    var previousStyle = cell.style.cssText;
+    var previousId = cell.id;
+
+    cell.style.cssText = emptyCell.style.cssText;
+    cell.id = emptyCell.id;
+
+    emptyCell.style.cssText = previousStyle;
+    emptyCell.id = previousId;
+
+    return true;
+  }
+
+  function isSolved() {
+    if (!getCell(size - 1, size - 1).classList.contains("empty")) {
+      return false;
+    }
+
+    var expected = 1;
+
+    for (var row = 0; row < size; row++) {
+      for (var col = 0; col < size; col++) {
+        if (
+          expected < total &&
+          getCell(row, col).dataset.number !== String(expected)
+        ) {
+          return false;
+        }
+
+        expected++;
+      }
+    }
+
+    return true;
+  }
+
+function finishGame() {
+  var seconds = elapsedSeconds();
+  var score = Math.max(100, startingScore - seconds * 2);
+
+  playing = false;
+  stopTimer();
+
+  timeElement.textContent = formatTime(seconds);
+
+  document.getElementById("result-time").textContent =
+    formatTime(seconds);
+
+  document.getElementById("result-moves").textContent =
+    devanagari(moves);
+
+  document.getElementById("result-score").textContent =
+    String(score);
+
+  completedAttempt = {
+    seconds: seconds,
+    moves: moves,
+    rawScore: score,
+    leaderboardScore: Math.max(
+      0,
+      Math.min(100, Math.round(score / startingScore * 100))
+    ),
+    initialized: false,
+    saved: false
+  };
+
+  scoreStatus.textContent = "";
+  retryScoreButton.hidden = true;
+
+  dialog.showModal();
+  submitCompletedScore();
+}
+
+  function solve() {
+    if (scrambling || savingScore) return;
+
+completedAttempt = null;
+scoreStatus.textContent = "";
+retryScoreButton.hidden = true;
+
+    playing = false;
+    stopTimer();
+    moves = 0;
+    updateMoves();
+    timeElement.textContent = "00:00";
+    createSolvedBoard();
+  }
+
+  function scramble() {
+    if (scrambling || savingScore) return;
+
+completedAttempt = null;
+scoreStatus.textContent = "";
+retryScoreButton.hidden = true;
+
+    playing = false;
+    scrambling = true;
+    stopTimer();
+
+    moves = 0;
+    updateMoves();
+    timeElement.textContent = "00:00";
+
+    solveButton.disabled = true;
+    scrambleButton.disabled = true;
+    puzzle.classList.remove("animate");
+    puzzle.setAttribute("aria-busy", "true");
+
+    var previousCell = null;
+    var steps = 0;
+
+    /* Shuffle through legal moves to keep the puzzle solvable. */
+    var interval = setInterval(function () {
+      var adjacent = getAdjacentCells(getEmptyCell());
+
+      var choices = adjacent.filter(function (cell) {
+        return cell !== previousCell;
+      });
+
+      if (!choices.length) choices = adjacent;
+
+      var selected = choices[
+        Math.floor(Math.random() * choices.length)
+      ];
+
+      shiftCell(selected);
+      previousCell = selected;
+      steps++;
+
+      if (steps >= 100) {
+        clearInterval(interval);
+
+        /* Avoid starting an attempt on a solved board. */
+        if (isSolved()) {
+          shiftCell(getAdjacentCells(getEmptyCell())[0]);
+        }
+
+        scrambling = false;
+        playing = true;
+
+        solveButton.disabled = false;
+        scrambleButton.disabled = false;
+        puzzle.removeAttribute("aria-busy");
+
+        startTimer();
+      }
+    }, 5);
+  }
+
+  puzzle.addEventListener("click", function (event) {
+    if (!playing || scrambling) return;
+
+    var cell = event.target.closest("span.number");
+
+    if (!cell || cell.parentElement !== puzzle) return;
+
+    puzzle.classList.add("animate");
+
+    if (shiftCell(cell)) {
+      moves++;
+      updateMoves();
+
+      if (isSolved()) {
+        finishGame();
+      }
+    }
+  });
+
+  solveButton.addEventListener("click", solve);
+  scrambleButton.addEventListener("click", scramble);
+
+  updateMoves();
+  createSolvedBoard();
 }());
