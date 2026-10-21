@@ -330,3 +330,59 @@ dialog.puzzle-result::backdrop {
     transition: none;
   }
 }
+
+
+.sliding-game .puzzle-sidebar {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.sliding-game .personal-best {
+  padding: 24px;
+  border: 1px solid #dce5ee;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.sliding-game .personal-best h2 {
+  margin: 0 0 18px;
+  font-size: 24px;
+}
+
+.sliding-game .personal-best dl {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.sliding-game .personal-best dl > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.sliding-game .personal-best dt {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.sliding-game .personal-best dd {
+  margin: 0;
+  color: #194879;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.sliding-game #best-status {
+  margin: 16px 0 0;
+  color: #526578;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sliding-game #best-status:empty {
+  display: none;
+}

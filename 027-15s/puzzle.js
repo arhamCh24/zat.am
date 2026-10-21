@@ -8,6 +8,7 @@
 
   var params = new URLSearchParams(window.location.search);
   var size = params.get("size") === "3" ? 3 : 4;
+  var levelId = size === 3 ? 1 : 2;
   var total = size * size;
   var startingScore = size === 3 ? 1000 : 2000;
 
@@ -36,6 +37,10 @@
   var savingScore = false;
   var sharedRunInitialized = false;
 
+  var bestFirebase = null;
+  var bestFirestore = null;
+  var bestRequestId = 0;
+
   game.style.setProperty("--puzzle-size", String(size));
 
   document.title =
@@ -51,6 +56,207 @@
 
   function devanagari(value) {
     return Sanscript.t(String(value), "iast", "devanagari");
+  }
+
+  function formatTime(seconds) {
+    return (
+      String(Math.floor(seconds / 60)).padStart(2, "0") +
+      ":" +
+      String(seconds % 60).padStart(2, "0")
+    );
+  }
+
+  /*
+   * Personal best is read from the signed-in user's existing
+   * leaderboard history. No additional database writes are used.
+   */
+  function showPersonalBest(best, message) {
+    document.getElementById("best-score").textContent =
+      best ? best.score + " / 100" : "— / 100";
+
+    document.getElementById("best-moves").textContent =
+      best ? String(best.moves) : "—";
+
+    document.getElementById("best-time").textContent =
+      best ? formatTime(best.seconds) : "—";
+
+    document.getElementById("best-status").textContent =
+      message || "";
+  }
+
+  function isBetterBest(candidate, current) {
+    return (
+      !current ||
+      candidate.score > current.score ||
+      (
+        candidate.score === current.score &&
+        (
+          candidate.seconds < current.seconds ||
+          (
+            candidate.seconds === current.seconds &&
+            candidate.moves < current.moves
+          )
+        )
+      )
+    );
+  }
+
+  function bestFromHistory(history, uid) {
+    var best = null;
+
+    history.forEach(function (monthDocument) {
+      var data = monthDocument.data();
+      var entries = data.entries || {};
+      var metadata = data.attemptMeta || {};
+
+      Object.keys(entries).forEach(function (key) {
+        // Shared format: timestamp_UID_elapsedSeconds_gameId.
+        var parts = key.split("_");
+
+        if (
+          parts.length < 4 ||
+          parts[parts.length - 1] !== "027-15s"
+        ) {
+          return;
+        }
+
+        // Supports UIDs containing underscores.
+        var entryUserId = parts.slice(1, -2).join("_");
+
+        if (entryUserId !== uid) return;
+
+        var attempt = metadata[key];
+
+        if (!attempt || attempt.result !== "completed") return;
+        if (Number(attempt.puzzleSize) !== size) return;
+
+        // Read the exact 0–100 score stored by shared scoring.
+        var candidate = {
+          score: entries[key],
+          moves: attempt.moves,
+          seconds: attempt.elapsedSeconds
+        };
+
+        if (
+          !Number.isInteger(candidate.score) ||
+          candidate.score < 0 ||
+          candidate.score > 100 ||
+          !Number.isInteger(candidate.moves) ||
+          candidate.moves <= 0 ||
+          !Number.isInteger(candidate.seconds) ||
+          candidate.seconds < 0
+        ) {
+          return;
+        }
+
+        if (isBetterBest(candidate, best)) {
+          best = candidate;
+        }
+      });
+    });
+
+    return best;
+  }
+
+  async function loadPersonalBest(clearPrevious) {
+    if (!bestFirebase || !bestFirestore) return;
+
+    var requestId = ++bestRequestId;
+    var user = bestFirebase.auth.currentUser;
+
+    if (clearPrevious || !user) {
+      showPersonalBest(null, "");
+    }
+
+    if (!user) {
+      showPersonalBest(
+        null,
+        "Sign in to see your personal best."
+      );
+      return;
+    }
+
+    try {
+      var history = await bestFirestore.getDocs(
+        bestFirestore.collection(
+          bestFirebase.db,
+          "leaderboards",
+          "027-15s",
+          "gameHistory"
+        )
+      );
+
+      // Ignore requests belonging to a previous account.
+      if (
+        requestId !== bestRequestId ||
+        bestFirebase.auth.currentUser?.uid !== user.uid
+      ) {
+        return;
+      }
+
+      var best = bestFromHistory(history, user.uid);
+
+      showPersonalBest(
+        best,
+        best ? "" : "No saved results for this puzzle size yet."
+      );
+    } catch (error) {
+      if (
+        requestId !== bestRequestId ||
+        bestFirebase.auth.currentUser?.uid !== user.uid
+      ) {
+        return;
+      }
+
+      console.warn(
+        "Personal best history could not load.",
+        error
+      );
+
+      document.getElementById("best-status").textContent =
+        "Could not refresh personal best. Please try refreshing the page.";
+    }
+  }
+
+  async function initializePersonalBest() {
+    try {
+      var modules = await Promise.all([
+        import("../auth/api/firebase-config.js"),
+        import(
+          "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js"
+        )
+      ]);
+
+      bestFirebase = modules[0];
+      bestFirestore = modules[1];
+
+      bestFirebase.onAuthStateChanged(
+        bestFirebase.auth,
+        function () {
+          loadPersonalBest(true);
+        },
+        function (error) {
+          bestRequestId++;
+
+          console.warn(
+            "Personal best authentication failed.",
+            error
+          );
+
+          showPersonalBest(
+            null,
+            "Could not check your sign-in status."
+          );
+        }
+      );
+    } catch (error) {
+      console.warn("Personal best is unavailable.", error);
+
+      showPersonalBest(
+        null,
+        "Personal best is temporarily unavailable."
+      );
+    }
   }
 
   function loadScoring() {
@@ -71,14 +277,6 @@
     }
 
     return scoringLoading;
-  }
-
-  function formatTime(seconds) {
-    return (
-      String(Math.floor(seconds / 60)).padStart(2, "0") +
-      ":" +
-      String(seconds % 60).padStart(2, "0")
-    );
   }
 
   function elapsedSeconds() {
@@ -141,7 +339,9 @@
   }
 
   function getCell(row, col) {
-    return document.getElementById("cell-" + row + "-" + col);
+    return document.getElementById(
+      "cell-" + row + "-" + col
+    );
   }
 
   function getEmptyCell() {
@@ -210,9 +410,7 @@
 
     var emptyCell = getEmptyAdjacentCell(cell);
 
-    if (!emptyCell) {
-      return false;
-    }
+    if (!emptyCell) return false;
 
     var previousStyle = cell.style.cssText;
     var previousId = cell.id;
@@ -227,7 +425,9 @@
   }
 
   function isSolved() {
-    if (!getCell(size - 1, size - 1).classList.contains("empty")) {
+    if (
+      !getCell(size - 1, size - 1).classList.contains("empty")
+    ) {
       return false;
     }
 
@@ -265,7 +465,7 @@
     try {
       var shared = await loadScoring();
 
-      // Fallback if shared scoring was unavailable at the start.
+      // Fallback if scoring was unavailable when play started.
       if (!attempt.initialized) {
         shared.initGameScore({
           gameId: "027-15s",
@@ -279,7 +479,9 @@
         attempt.leaderboardScore,
         {
           result: "completed",
+          levelId: levelId,
           metrics: {
+            levelId: levelId,
             puzzleSize: size,
             puzzleType: size === 3 ? "8-puzzle" : "15-puzzle",
             moves: attempt.moves,
@@ -292,6 +494,7 @@
 
       if (result.ok || result.reason === "already-submitted") {
         attempt.saved = true;
+        loadPersonalBest(false);
 
         scoreStatus.textContent =
           "Leaderboard score saved: " +
@@ -322,7 +525,19 @@
 
   function finishGame() {
     var seconds = elapsedSeconds();
-    var score = Math.max(100, startingScore - seconds * 2);
+
+    var rawScore = Math.max(
+      100,
+      startingScore - seconds * 2 - moves * 2
+    );
+
+    var leaderboardScore = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(rawScore / startingScore * 100)
+      )
+    );
 
     playing = false;
     stopTimer();
@@ -336,16 +551,13 @@
       devanagari(moves);
 
     document.getElementById("result-score").textContent =
-      String(score);
+      leaderboardScore + " / 100";
 
     completedAttempt = {
       seconds: seconds,
       moves: moves,
-      rawScore: score,
-      leaderboardScore: Math.max(
-        0,
-        Math.min(100, Math.round(score / startingScore * 100))
-      ),
+      rawScore: rawScore,
+      leaderboardScore: leaderboardScore,
       initialized: sharedRunInitialized,
       saved: false
     };
@@ -391,7 +603,7 @@
     var previousCell = null;
     var steps = 0;
 
-    // Shuffle through legal moves to keep the puzzle solvable.
+    // Legal movements keep the shuffled puzzle solvable.
     var interval = setInterval(function () {
       var adjacent = getAdjacentCells(getEmptyCell());
 
@@ -412,7 +624,6 @@
       if (steps >= 100) {
         clearInterval(interval);
 
-        // Do not start an attempt on an already solved board.
         if (isSolved()) {
           shiftCell(getAdjacentCells(getEmptyCell())[0]);
         }
@@ -443,7 +654,10 @@
 
   solveButton.addEventListener("click", solve);
   scrambleButton.addEventListener("click", scramble);
-  retryScoreButton.addEventListener("click", submitCompletedScore);
+  retryScoreButton.addEventListener(
+    "click",
+    submitCompletedScore
+  );
 
   closeButton.addEventListener("click", function () {
     dialog.close();
@@ -456,6 +670,7 @@
     scramble();
   });
 
+  initializePersonalBest();
   updateMoves();
   createSolvedBoard();
 }());
