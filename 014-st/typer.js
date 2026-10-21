@@ -42,7 +42,7 @@ document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 window.addEventListener("resize", resizeHandler);
 
-// Switching tabs pauses the game and survival timer.
+// Pause the game on switching tabs
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && !gameFinished) {
     paused = true;
@@ -54,7 +54,6 @@ document.addEventListener("visibilitychange", () => {
 submitButton.addEventListener("click", submitScore);
 retryButton.addEventListener("click", restart);
 
-// Initialize the existing shared scoring system once it has loaded.
 window.addEventListener("load", () => {
   initializeScoring();
 });
@@ -227,7 +226,6 @@ function createLetters(frames) {
       x,
       y,
 
-      // Includes every digit from 0 through 9.
       code: 48 + Math.floor(Math.random() * 10),
 
       speedX: (dX / distance) * speed,
@@ -237,8 +235,7 @@ function createLetters(frames) {
 }
 
 function removeLetters(frames) {
-  // Move and check one simulation step at a time so a slow
-  // rendering frame cannot move numbers through the ball.
+  // Move and check one simulation step at a time so a slow rendering frame cannot move numbers through the ball.
   for (let frame = 0; frame < frames; frame++) {
     for (const item of letters) {
       item.x += item.speedX;
@@ -389,7 +386,6 @@ async function submitScore() {
   submitting = true;
   submitButton.disabled = true;
 
-  // Prevent restarting while this attempt is being saved.
   retryButton.disabled = true;
 
   scoreSaveStatus.textContent = "Saving your score...";
