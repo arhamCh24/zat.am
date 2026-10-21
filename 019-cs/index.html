@@ -12,6 +12,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 
 <script src="js/paper.js" type="text/javascript"></script>
+<script src="js/score-config.js" type="text/javascript"></script>
 <script src="https://zat.am/cmpk-jul.json"></script>
 <script>
 const urlParams = new URLSearchParams(window.location.search);
@@ -165,6 +166,8 @@ $("#hintword-text").text(wlist[set][inum]);
 
         var puzzle = new Html5Puzzle(config);
         puzzle.zoom(-.3);
+        var scoreConfig = window.PUZZLE_SCORE_CONFIG;
+        document.getElementById('win-score').textContent = scoreConfig.initialScore;
         var startedAt = null;
         var puzzleCompleted = false;
         function startGameTimer() {
@@ -178,8 +181,10 @@ $("#hintword-text").text(wlist[set][inum]);
             }, 1000);
         }
         function calculateFinalScore(elapsedSeconds) {
-            var deductions = Math.floor(Math.max(0, elapsedSeconds - 20) / 10) * 5;
-            return Math.max(0, 100 - deductions);
+            var secondsAfterGracePeriod = Math.max(0, elapsedSeconds - scoreConfig.deductionStartsAfterSeconds);
+            var deductionCount = Math.floor(secondsAfterGracePeriod / scoreConfig.deductionIntervalSeconds);
+            var deductions = deductionCount * scoreConfig.deductionAmount;
+            return Math.max(0, scoreConfig.initialScore - deductions);
         }
         $('.zoomIn').click(function() {
             puzzle.zoom(.1);

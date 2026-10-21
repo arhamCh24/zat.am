@@ -24,6 +24,8 @@ play area is a hint for the current picture.
 - `Puzzle.css` styles the play area and responsive layout using shared theme
   colors and components.
 - `js/paper.js` is the Paper.js library used to render and manipulate pieces.
+- `js/score-config.js` contains the initial score, deduction delay, deduction
+  interval, and points deducted per interval.
 - `../shared/game-theme.css` provides shared game styling.
 - `../js/game-score.js` handles leaderboard score submissions.
 - `../js/navbar-loader.js` loads the shared site navigation.
