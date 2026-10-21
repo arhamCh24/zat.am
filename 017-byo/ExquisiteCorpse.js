@@ -1,7 +1,10 @@
 const urlParams = new URLSearchParams(window.location.search);
+var setCount = Math.min(wlist.length, ilist.length);
 var set = urlParams.get('s');
-if (!set || isNaN(set) || set>=wlist.length)
+if (!set || !Number.isInteger(Number(set)) || Number(set) < 0 || Number(set) >= setCount)
 	set=0;
+else
+	set=Number(set);
 var t = urlParams.get('t');
 if (!t || isNaN(t))
 	t=1;
@@ -12,37 +15,47 @@ var imgs = ilist[parseInt(set)];
 var words=wlist[parseInt(set)];
 
 $(function(){
+	let choicesVisible = Number(h) === 0;
+	const choiceButtons = $('#pres-btns');
+	const choicesToggle = $('#show-choices');
+	const setChoice = $('#set-choice');
+	for (let index = 0; index < setCount; index++) {
+		setChoice.append(new Option(String(index), String(index)));
+	}
+	setChoice.val(String(set));
 	
-	$('#btn-top-next').click( topNext );
-	$('#btn-top-prev').click( topPrev );
-	$('#btn-mid-next').click( midNext );
-	$('#btn-mid-prev').click( midPrev );
-	$('#btn-bottom-next').click( bottomNext );
-	$('#btn-bottom-prev').click( bottomPrev );
+	[
+		['#btn-top-next', topNext],
+		['#btn-top-prev', topPrev],
+		['#btn-mid-next', midNext],
+		['#btn-mid-prev', midPrev],
+		['#btn-bottom-next', bottomNext],
+		['#btn-bottom-prev', bottomPrev],
+	].forEach(([selector, handler]) => $(selector).click(handler));
 	$('#random-button').click( randomEC );
-	
-	$('#btn-1').click( function(){ selectEC(1, this) } );
-	$('#btn-2').click( function(){ selectEC(2, this) } );
-	$('#btn-3').click( function(){ selectEC(3, this) } );
-	$('#btn-4').click( function(){ selectEC(4, this) } );
-	$('#btn-5').click( function(){ selectEC(5, this) } );
-	$('#btn-6').click( function(){ selectEC(6, this) } );
-	$('#btn-7').click( function(){ selectEC(7, this) } );
-	$('#btn-8').click( function(){ selectEC(8, this) } );
-	$('#btn-9').click( function(){ selectEC(9, this) } );
-	$('#btn-10').click( function(){ selectEC(10, this) } );
-		$('#btn-11').click( function(){ selectEC(11, this) } );
-			$('#btn-12').click( function(){ selectEC(12, this) } );
+	$('.pres-btn').each(function () {
+		const sectionId = Number(this.id.slice('btn-'.length));
+		$(this).click(function () { selectEC(sectionId, this); });
+	});
+	choicesToggle.click(function () {
+		choicesVisible = !choicesVisible;
+		choiceButtons.toggle(choicesVisible);
+		choicesToggle.text(choicesVisible ? 'Hide choices' : 'Show choices');
 
-	$('.pres-btn').hover( function(){ btnOn(this) }, function(){ btnOff(this) } );
-	$('.arrow-btn').hover( function(){ btnOn(this) }, function(){ btnOff(this) } );
-	$('#random-button').hover( function(){ btnOn(this) }, function(){ btnOff(this) } );
-		
-	// stack images
-	// for(var i = 1; i <= 10; i++){
-	// 	var section = $('#top-section-' + i);
-	// 	section.css({'z-index': i});
-	// }
+		const url = new URL(window.location.href);
+		url.searchParams.set('h', choicesVisible ? '0' : '1');
+		window.history.replaceState(null, '', url.href);
+	});
+	setChoice.change(function () {
+		const url = new URL(window.location.href);
+		url.searchParams.set('s', this.value);
+		window.location.assign(url.href);
+	});
+
+	$('.arrow-btn').hover(
+		function(){ btnOn(this) },
+		function(){ btnOff(this) }
+	);
 	
 	var curTop = 0;
 	var curMid = 0;
@@ -56,17 +69,17 @@ $(function(){
 	setTimeout(randomEC, 1000);
 
 	function randomEC(){
-		while(nextTop == curTop) nextTop = Math.floor(Math.random() * 10) + 1;
-		while(nextMid == curMid) nextMid = Math.floor(Math.random() * 10) + 1;
-		while(nextBottom == curBottom) nextBottom = Math.floor(Math.random() * 10) + 1;
+		while(nextTop == curTop) nextTop = Math.floor(Math.random() * 12) + 1;
+		while(nextMid == curMid) nextMid = Math.floor(Math.random() * 12) + 1;
+		while(nextBottom == curBottom) nextBottom = Math.floor(Math.random() * 12) + 1;
 		
 		var t = curTop;
 		var m = curMid;
 		var b = curBottom;
 	
 		animateSection('top', t, nextTop, -1);
-		var t1 = setTimeout(function(){ animateSection('mid', m, nextMid, -1) }, 250);
-		var t2 = setTimeout(function(){ animateSection('bottom', b, nextBottom, -1) }, 500);
+		setTimeout(function(){ animateSection('mid', m, nextMid, -1) }, 250);
+		setTimeout(function(){ animateSection('bottom', b, nextBottom, -1) }, 500);
 	
 		curTop = nextTop;
 		curMid = nextMid;
@@ -90,11 +103,11 @@ $(function(){
 			}
 
 			if(nextMid != curMid){
-				var t1 = setTimeout(function(){ animateSection('mid', m, nextMid, -1) }, delay);
+				setTimeout(function(){ animateSection('mid', m, nextMid, -1) }, delay);
 				delay += 250;
 			}
 		
-			if(nextBottom != curBottom) var t2 = setTimeout(function(){ animateSection('bottom', b, nextBottom, -1) }, delay);
+			if(nextBottom != curBottom) setTimeout(function(){ animateSection('bottom', b, nextBottom, -1) }, delay);
 	
 			curTop = nextTop;
 			curMid = nextMid;
@@ -111,58 +124,57 @@ $(function(){
 		else
 			document.getElementById("wrd").innerHTML="?";
 
-		//document.getElementById("wrd").title =Sanscript.t(document.getElementById("wrd").innerHTML,'itrans', 'devanagari');
 if (t==1)
 	document.getElementById("wrd").innerHTML +=  " - " + Sanscript.t(document.getElementById("wrd").innerHTML, 'devanagari','itrans');
 		var activeBtn = $(".active");
 		if(activeBtn.length){
 			$(activeBtn).removeClass("active");
-			btnOff(activeBtn[0]);
 		}
 
 	}
 	function animateSection(section, curID, nextID, dir){
-		if(curID != 0){ $('#' + section + '-section-' + curID).animate( {left: (731 * dir)}, 500, function(){} ); }
-		$('#' + section + '-section-' + nextID).css( {left: (-731 * dir)} );
-		$('#' + section + '-section-' + nextID).animate( {left: 0}, 500, function(){} );
+		var slideWidth = $('#presidents').width();
+		if(curID != 0){ $('#' + section + '-section-' + curID).animate( {left: (slideWidth * dir)}, 500 ); }
+		$('#' + section + '-section-' + nextID).css( {left: (-slideWidth * dir)} );
+		$('#' + section + '-section-' + nextID).animate( {left: 0}, 500 );
 	}
 
-	function topNext($evt){
+	function topNext(){
 		nextTop = (curTop >= lastSection) ? 1 : curTop + 1;
 		animateSection('top', curTop, nextTop, -1);
 		curTop = nextTop;
 		clearActiveEC();
 	}
 	
-	function topPrev($evt){
+	function topPrev(){
 		nextTop = (curTop <= 1) ? lastSection : curTop - 1;
 		animateSection('top', curTop, nextTop, 1);
 		curTop = nextTop;
 		clearActiveEC();
 	}
 
-	function midNext($evt){
+	function midNext(){
 		nextMid = (curMid >= lastSection) ? 1 : curMid + 1;
 		animateSection('mid', curMid, nextMid, -1);
 		curMid = nextMid;
 		clearActiveEC();
 	}
 	
-	function midPrev($evt){
+	function midPrev(){
 		nextMid = (curMid <= 1) ? lastSection : curMid - 1;
 		animateSection('mid', curMid, nextMid, 1);
 		curMid = nextMid;
 		clearActiveEC();
 	}
 
-	function bottomNext($evt){
+	function bottomNext(){
 		nextBottom = (curBottom >= lastSection) ? 1 : curBottom + 1;
 		animateSection('bottom', curBottom, nextBottom, -1);
 		curBottom = nextBottom;
 		clearActiveEC();
 	}
 	
-	function bottomPrev($evt){
+	function bottomPrev(){
 		nextBottom = (curBottom <= 1) ? lastSection : curBottom - 1;
 		animateSection('bottom', curBottom, nextBottom, 1);
 		curBottom = nextBottom;
@@ -170,36 +182,20 @@ if (t==1)
 	}
 	
 	function btnOn(element){
-		if (element.tagName == "P")
-		  element.style.fontWeight = "bold";
-	    else
-		{
- 		element.src = element.src.replace("_off", "_on");
-		}
+		element.src = element.src.replace("_off", "_on");
 	}
 	
 	function btnOff(element){
-		if (element.tagName == "P")
-		 element.style.fontWeight = "";
-	    else
-		{
-		if($(element).hasClass("active") == false){
-			element.src = element.src.replace("_on", "_off");
-		}
-		}
+		element.src = element.src.replace("_on", "_off");
 	}
 	
-for (i=1;i<=12;i++)
-{
-cid="top"+i;
-document.getElementsByClassName(cid)[0].style.backgroundImage="url('"+imgs[i-1]+"')";
-cid="mid"+i;
-document.getElementsByClassName(cid)[0].style.backgroundImage="url('"+imgs[i-1]+"')";
-cid="bottom"+i;
-document.getElementsByClassName(cid)[0].style.backgroundImage="url('"+imgs[i-1]+"')";
-pid="btn-"+i;
-document.getElementById(pid).innerHTML=words[i-1];
+for (let i = 1; i <= 12; i++) {
+	const imageUrl = `url('${imgs[i - 1]}')`;
+	document.querySelector(`.top${i}`).style.backgroundImage = imageUrl;
+	document.querySelector(`.mid${i}`).style.backgroundImage = imageUrl;
+	document.querySelector(`.bottom${i}`).style.backgroundImage = imageUrl;
+	document.getElementById(`btn-${i}`).innerHTML = words[i - 1];
 }
-  if (h==1)
-	$("#pres-btns").hide();
+	choiceButtons.toggle(choicesVisible);
+	choicesToggle.text(choicesVisible ? 'Hide choices' : 'Show choices');
 });

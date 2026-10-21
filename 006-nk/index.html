@@ -21,7 +21,7 @@ Random Name Generator for Javascript
 
 
 function getRandomInt(min, max) {
-  	return Math.floor(Math.random() * (max - min)) + min;
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 var nicknameWords = null;
@@ -44,12 +44,27 @@ function generateName() {
   if (!nicknameWords) return "";
   var adjectives = nicknameWords.adjectives;
   var animals = nicknameWords.animals;
-  return adjectives[getRandomInt(0, adjectives.length)] + '-' + animals[getRandomInt(0, animals.length)];
+  var animalParts = animals[getRandomInt(0, animals.length)].trim().split(/\s+/);
+  return {
+    adjective: adjectives[getRandomInt(0, adjectives.length)],
+    animal: animalParts[0],
+    emoji: animalParts.slice(1).join(" ")
+  };
 }
 
 function shownaama() {
   if (!nicknameWords) return;
-  document.getElementById("nameplace").textContent = generateName();
+  var result = generateName();
+  var nameplace = document.getElementById("nameplace");
+  nameplace.replaceChildren();
+  nameplace.append(document.createTextNode(result.adjective + "-" + result.animal));
+  if (result.emoji) {
+    var emoji = document.createElement("span");
+    emoji.className = "name-generator-emoji";
+    emoji.setAttribute("aria-label", "animal emoji");
+    emoji.textContent = result.emoji;
+    nameplace.append(" ", emoji);
+  }
 }</script>
 <main class="zatam-game-shell">
 	<section class="zatam-game-header">

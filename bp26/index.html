@@ -1,62 +1,115 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>SB संस्कृतम् competition 2026</title>
+
     <script
       type="text/javascript"
       src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"
     ></script>
+
     <script
       type="text/javascript"
       src="https://unpkg.com/papaparse@latest/papaparse.min.js"
     ></script>
+
     <script type="text/javascript" src="js/tabletop1.3.4.js"></script>
+
     <script type="text/javascript" src="js/sheetsee.js"></script>
+
     <script type="text/javascript" src="js/table.js"></script>
+
     <script type="text/javascript" src="js/leaflet.markercluster.js"></script>
+
+    <!-- BP26 page styles -->
     <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <!-- Header CSS -->
+
+    <!-- Shared BP26 header -->
     <link rel="stylesheet" href="css/header.css" />
   </head>
-  <body>
+
+  <body class="bp26-page">
     <!-- Header Placeholder -->
     <div id="header-placeholder"></div>
-    <!-- Auth Middleware-->
+
+    <!-- Auth Middleware -->
     <script type="module" src="../auth/api/middleware.js"></script>
+
     <!-- Bilingual toggle for game/competition pages -->
     <script type="module" src="../js/bilingual-toggle.js"></script>
 
     <!-- Load Header -->
     <script src="js/load-header.js"></script>
 
-    <!-- <img src="bp26c.png" style="float: left" width="5%" /> -->
-    <h1>
-      vishwa-<span style="color: Tomato">2026 </span
-      ><a
-        href="https://whatsapp.com/channel/0029Vb71yGv60eBcIUlm5f0y"
-        x-href="http://bodhaplay.samskritabharatiusa.org/sy26"
-        target="bp26"
-        >शब्दयात्रा शब्दस्पर्धा च</a
-      >
-    </h1>
-    <h3>
-      email - <a href="mailto:pratidinam@sbusa.org">pratidinam@sbusa.org</a> WA
-      channel -
-      <a href="https://whatsapp.com/channel/0029Vb71yGv60eBcIUlm5f0y">here</a>
-    </h3>
-    <a class="mantra" href="d3.png" style="float: left" target="mantra"
-      >ध्येय-मन्त्रः dhyeya-mantraH</a
-    >
-    <a class="mantra" style="float: right" href="s.png" target="mantra"
-      >शान्ति-मन्त्रः shaanti-mantraH</a
-    >
-    <div id="calendar-goes-here"></div>
+    <main class="bp26-home">
+      <!-- <img src="bp26c.png" style="float: left" width="5%" /> -->
+      <section class="bp26-hero">
+        <div class="bp26-eyebrow">BODHAPLAY • 2026</div>
+
+        <h1 class="bp26-title">
+          vishwa-<span class="bp26-year">2026</span>
+          <a
+            href="https://whatsapp.com/channel/0029Vb71yGv60eBcIUlm5f0y"
+            x-href="http://bodhaplay.samskritabharatiusa.org/sy26"
+            target="bp26"
+          >
+            शब्दयात्रा शब्दस्पर्धा च
+          </a>
+        </h1>
+
+        <p class="bp26-subtitle">
+          संस्कृत learning, activities and competition schedule
+        </p>
+
+        <h3 class="bp26-contact">
+          <span>
+            Email:
+            <a href="mailto:pratidinam@sbusa.org"> pratidinam@sbusa.org </a>
+          </span>
+
+          <span class="bp26-contact-divider"> • </span>
+
+          <span>
+            WhatsApp Channel:
+            <a
+              href="https://whatsapp.com/channel/0029Vb71yGv60eBcIUlm5f0y"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Join here
+            </a>
+          </span>
+        </h3>
+      </section>
+
+      <section class="bp26-resource-row" aria-label="Contest resources">
+        <a class="mantra" href="d3.png" target="mantra">
+          <span class="mantra-label"> ध्येय-मन्त्रः </span>
+
+          <span class="mantra-english"> DHYEYA-MANTRAH </span>
+        </a>
+
+        <a class="mantra" href="s.png" target="mantra">
+          <span class="mantra-label"> शान्ति-मन्त्रः </span>
+
+          <span class="mantra-english"> SHAANTI-MANTRAH </span>
+        </a>
+      </section>
+
+      <section class="bp26-calendar-section">
+        <div id="calendar-goes-here"></div>
+      </section>
+    </main>
+
     <script type="text/javascript">
       document.addEventListener("DOMContentLoaded", function () {
         var lnk =
           "https://docs.google.com/spreadsheets/d/e/2PACX-1vTqqR7xR-WyJbpQQNwicbH7vEDwRv9cQ3UBlg_MRoaKLwkjqxBR1eVO9CR6AMYKaXEYLwZVO6TEyxSZ/pub?gid=0&single=true&output=csv";
+
         Papa.parse(lnk, {
           download: true,
           header: true,
@@ -64,12 +117,16 @@
         });
       });
     </script>
+
     <script>
       $(document).ready(function () {
         $("h2").css("display", "block");
+
         $("table").css("display", "table");
+
         $("#cal-controls").css("display", "none");
       });
+
       // Add Sanskrit day names to mobile view
       function addDayNames() {
         if (window.innerWidth <= 768) {
@@ -88,11 +145,15 @@
 
           rows.forEach((row) => {
             const cells = row.querySelectorAll("td");
+
             cells.forEach((cell, index) => {
               const dayNumber = cell.querySelector(".day");
+
               if (dayNumber && dayNumber.textContent.trim()) {
                 const sanskritDay = dayNames[index % 7];
+
                 const date = dayNumber.textContent.trim();
+
                 cell.setAttribute("data-day-name", `${sanskritDay} - ${date}`);
               }
             });
@@ -102,6 +163,7 @@
 
       // Run on load and resize
       window.addEventListener("load", addDayNames);
+
       window.addEventListener("resize", addDayNames);
     </script>
   </body>
