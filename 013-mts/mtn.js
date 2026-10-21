@@ -404,6 +404,30 @@ function movePlayer(direction) {
 }
 
 /* =========================================
+   SCORE CALCULATION
+   ========================================= */
+
+function calculateScore(elapsedSeconds, totalMoves) {
+  const minuteBracket = Math.floor(elapsedSeconds / 60);
+
+  // No points after 10 minutes
+  if (minuteBracket >= 10) {
+    return 0;
+  }
+
+  // Start at 100, decrease by 10 every minute
+  const baseScore = 100 - minuteBracket * 10;
+
+  // Start with 30 moves, increase limit by 20 every minute
+  const moveLimit = 30 + minuteBracket * 20;
+
+  // Deduct 5 points if the player exceeds the move limit
+  const movePenalty = totalMoves > moveLimit ? 5 : 0;
+
+  return Math.max(0, baseScore - movePenalty);
+}
+
+/* =========================================
    COMPLETION
    ========================================= */
 
@@ -427,7 +451,7 @@ async function finishGame() {
   gameFinished = true;
   stopTimer();
 
-  const score = 100;
+  const score = calculateScore(seconds, moves);
 
   scoreValue.textContent = score;
   finalScore.textContent = score;
@@ -445,7 +469,7 @@ async function finishGame() {
 
   if (!window.zatamScore) {
     scoreSaveStatus.textContent =
-      "Scoring system unavailable. Your local result is still 100.";
+      `Scoring system unavailable. Your local result is ${score}.`;
     return;
   }
 
