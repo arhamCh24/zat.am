@@ -496,7 +496,7 @@ export class WordSearchGame {
 
     // Loading the shared scorer dynamically keeps the word-search playable
     // if Firebase or its CDN is temporarily unavailable.
-    this.scoreApiReady = import(SHARED_SCORE_MODULE_URL)
+    this.scoreApiReady = import(/* @vite-ignore */ SHARED_SCORE_MODULE_URL)
       .then((scoreApi) => {
         scoreApi.initGameScore({
           gameId: "001-sbg",

@@ -16,10 +16,10 @@ Then open `http://localhost:4173/001-sbg/index.html?size=10&ch=1&v=1`.
 
 ## Test
 
-Run the dependency-free checks with:
+From the repository root, run the dependency-free checks with:
 
 ```powershell
-npm test
+npm --prefix .\001-sbg test
 ```
 
 They cover URL validation, chapter/verse boundaries, Devanagari-number
@@ -54,6 +54,19 @@ and the shared leaderboard module at `../js/game-score.js`.
   players. The completion time is recorded as a leaderboard metric.
 - If the shared leaderboard is temporarily unavailable, the puzzle and its
   local score still work normally.
+
+## Project review
+
+- **Type:** A scoreable word-search game, rather than a learning tool.
+- **Theme:** Uses the shared game shell in `../shared/game-theme.css` for the
+  page chrome, instructions, statistics, actions, completion panel, and
+  responsive layout. The letter board keeps its game-specific presentation.
+- **Scoring:** Uses the shared `../js/game-score.js` module. Scores range from
+  0–100, with higher scores better, and are submitted only after the full
+  puzzle is completed.
+- **Source:** Available and editable in this `001-sbg/` directory; the main
+  implementation is `index.html`, `styles/game.css`, and `scripts/game.js`.
+- **README:** Available and current (this file).
 
 ## Structure
 

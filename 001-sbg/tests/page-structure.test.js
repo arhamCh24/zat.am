@@ -60,7 +60,7 @@ test("the page uses the shared Zat.am game theme and score UI", () => {
   }
 
   assert.match(gameScript, /\.\.\/\.\.\/js\/game-score\.js/);
-  assert.match(gameScript, /import\(SHARED_SCORE_MODULE_URL\)/);
+  assert.match(gameScript, /import\(\/\* @vite-ignore \*\/ SHARED_SCORE_MODULE_URL\)/);
   assert.match(gameScript, /Shared leaderboard is unavailable/);
   assert.match(gameScript, /SCORE_INITIALIZATION_TIMEOUT_MS/);
   assert.match(gameScript, /await this\.waitForScoreApi\(\)/);
