@@ -20,8 +20,6 @@
 //   initGameScore({
 //     gameId: "009-mmk",
 //     gameName: "Memory क्रीडा",
-//     // Optional: a Date.now() timestamp captured when the game begins.
-//     startedAt: Date.now(),
 //   });
 //
 //   // When the game is actually finished:
@@ -92,19 +90,6 @@ function normalizeGameName(value) {
   return String(value || fallback)
     .trim()
     .slice(0, 120);
-}
-
-function normalizeStartedAt(value) {
-  const timestamp = Number(value);
-  const now = Date.now();
-
-  if (!Number.isFinite(timestamp) || timestamp <= 0) {
-    return now;
-  }
-
-  // A client clock can be inaccurate, but a future start time must never
-  // create a negative elapsed-time leaderboard entry.
-  return Math.min(Math.floor(timestamp), now);
 }
 
 function normalizeScore(value) {
@@ -229,10 +214,10 @@ async function ensureLeaderboardParents(gameId, gameName) {
 // PUBLIC INITIALIZATION
 // =====================================================
 
-export function initGameScore({ gameId, gameName, startedAt } = {}) {
+export function initGameScore({ gameId, gameName } = {}) {
   state.gameId = normalizeGameId(gameId);
   state.gameName = normalizeGameName(gameName);
-  state.runStartedAt = normalizeStartedAt(startedAt);
+  state.runStartedAt = Date.now();
   state.submitted = false;
   state.initialized = true;
 
