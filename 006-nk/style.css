@@ -17,6 +17,15 @@
 	text-wrap: balance;
 }
 
+.name-generator-emoji {
+	display: inline-block;
+	margin-inline-start: 0.12em;
+	font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+	font-size: 1.08em;
+	line-height: 1;
+	vertical-align: -0.06em;
+}
+
 .name-generator-card .zatam-game-btn {
 	width: min(100%, 300px);
 }
