@@ -3,7 +3,7 @@
    paintParticles, createParticles, processParticles */
 
 let score = 0;
-let lives = 3;
+let lives = 1;
 let elapsedSeconds = 0;
 let elapsedMilliseconds = 0;
 let gameFinished = false;
@@ -11,6 +11,7 @@ let paused = false;
 let submitting = false;
 let submitted = false;
 let letters = [];
+let incorrectPresses = 0;
 
 let previousTime = performance.now();
 
@@ -83,17 +84,10 @@ function formatTime(seconds) {
 }
 
 function updateScore() {
-  if (elapsedSeconds >= 90) {
-    score = 100;
-  } else if (elapsedSeconds >= 70) {
-    score = 80;
-  } else if (elapsedSeconds >= 40) {
-    score = 70;
-  } else if (elapsedSeconds >= 20) {
-    score = 50;
-  } else {
-    score = 0;
-  }
+  score = Math.max(
+    0,
+    Math.min(100, elapsedSeconds - incorrectPresses * 3)
+  );
 }
 
 function drawGame() {
@@ -182,7 +176,7 @@ loop(function (frames) {
 
     elapsedMilliseconds = Math.min(
       elapsedMilliseconds,
-      90000
+      150000
     );
 
     elapsedSeconds = Math.floor(
@@ -191,9 +185,9 @@ loop(function (frames) {
 
     updateScore();
 
-    if (score === 100) {
-      finishGame(true);
-    } else {
+    if (elapsedSeconds >= 150) {
+    finishGame(true);
+      } else {
       createLetters(frames);
       removeLetters(frames);
       processParticles(frames);
@@ -326,8 +320,11 @@ function keyDownHandler(event) {
   });
 
   if (targetIndex !== -1) {
-    const [item] = letters.splice(targetIndex, 1);
-    createParticles(item.x, item.y);
+  const [item] = letters.splice(targetIndex, 1);
+  createParticles(item.x, item.y);
+  } else {
+    incorrectPresses++;
+    updateScore();
   }
 
   // Typing never changes the survival-based score.
@@ -392,10 +389,12 @@ async function submitScore() {
 
   try {
     const result = await window.zatamScore.submit(score, {
-      result: score === 100 ? "completed" : "game-over",
+      result: elapsedSeconds >= 150 ? "completed" : "game-over",
       metrics: {
         elapsedSeconds,
-        livesRemaining: lives
+        livesRemaining: lives,
+        incorrectPresses,
+        penaltyPoints: incorrectPresses * 3
       }
     });
 
@@ -430,9 +429,10 @@ function restart() {
   if (submitting) return;
 
   score = 0;
-  lives = 3;
+  lives = 1;
   elapsedSeconds = 0;
   elapsedMilliseconds = 0;
+  incorrectPresses = 0;
   gameFinished = false;
   paused = false;
   submitted = false;
