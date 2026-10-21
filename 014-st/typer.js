@@ -118,24 +118,10 @@ function drawGame() {
     ? "18px Arial"
     : "24px Arial";
 
-  ctx.fillStyle = center.color;
-
-  ctx.textAlign = "left";
-  ctx.fillText(`Score: ${score}`, 16, 32);
-
-  ctx.textAlign = "center";
-  ctx.fillText(
-    formatTime(elapsedSeconds),
-    canvas.width / 2,
-    32
-  );
-
-  ctx.textAlign = "right";
-  ctx.fillText(
-    `Lives: ${lives}`,
-    canvas.width - 16,
-    32
-  );
+  document.getElementById("scoreValue").textContent = score;
+  document.getElementById("timerValue").textContent =
+    formatTime(elapsedSeconds);
+  document.getElementById("livesValue").textContent = lives;
 
   ctx.textAlign = "center";
   ctx.font = "16px Arial";
@@ -458,7 +444,7 @@ function resizeHandler() {
   const oldHeight = canvas.height;
 
   canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.height = Math.max(800, window.innerHeight);
 
   center.x = canvas.width / 2;
   center.y = canvas.height / 2;
