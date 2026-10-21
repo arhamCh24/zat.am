@@ -86,7 +86,7 @@ function formatTime(seconds) {
 function updateScore() {
   score = Math.max(
     0,
-    Math.min(100, elapsedSeconds - incorrectPresses * 3)
+    Math.min(100, elapsedSeconds - incorrectPresses * 2)
   );
 }
 
@@ -394,7 +394,7 @@ async function submitScore() {
         elapsedSeconds,
         livesRemaining: lives,
         incorrectPresses,
-        penaltyPoints: incorrectPresses * 3
+        penaltyPoints: incorrectPresses * 2
       }
     });
 
