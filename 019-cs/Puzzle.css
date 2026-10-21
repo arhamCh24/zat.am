@@ -129,6 +129,18 @@ body {
   max-width: calc(100% - 120px);
   text-align: center;
   transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+#hintword-text {
+  display: inline-block;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.puzzle-hint:hover #hintword-text,
+.puzzle-hint:focus-within #hintword-text {
+  opacity: 1;
 }
 
 .zoomIn,
