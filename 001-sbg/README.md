@@ -26,6 +26,22 @@ They cover URL validation, chapter/verse boundaries, Devanagari-number
 formatting, timer behavior, scoring rules, and the module load order in the
 main page.
 
+## Phone controls
+
+- Instructions and puzzle settings fold away to leave more room for the board.
+  Open **श्लोकः / कठिनता** to choose the chapter, verse, or difficulty; **Go**
+  loads the selected verse.
+- The board stays fitted to the phone screen, so every column remains visible.
+- Hint and restart stay at the bottom of the screen while playing on a phone.
+  **पदानि कानि?** highlights answer words directly in the shloka and brings
+  them into view without opening a dialog or shifting the verse layout.
+- Time starts at zero and counts up. Normal browser zoom remains available.
+
+For layout changes, also check the running game at 320px, 390px, and 768px
+widths, landscape orientation, and desktop size. Verify both open and closed
+settings, all three difficulties, and that highlighting a word does not move
+the board or introduce page-wide horizontal scrolling.
+
 ## Shared theme and scoring
 
 This game uses the shared Zat.am game shell from `../shared/game-theme.css`
@@ -36,7 +52,6 @@ and the shared leaderboard module at `../js/game-score.js`.
 - The first hint costs **10 points**; reopening it does not cost more.
 - Completing the full puzzle submits the final 0–100 score once for signed-in
   players. The completion time is recorded as a leaderboard metric.
-- A time-out shows a local score of 0 but does not create a leaderboard entry.
 - If the shared leaderboard is temporarily unavailable, the puzzle and its
   local score still work normally.
 
@@ -47,7 +62,7 @@ and the shared leaderboard module at `../js/game-score.js`.
 - `scripts/game.js` — UI controller and word-search board renderer.
 - `scripts/game/config.js` — pure puzzle configuration and formatting helpers.
 - `scripts/game/scoring.js` — local, testable inputs for the shared scoring policy.
-- `scripts/timer.js` — reusable countdown timer.
+- `scripts/timer.js` — reusable count-up and countdown timer.
 - `scripts/` — remaining variant and presentation scripts.
 - `data/` — Bhagavad Gita verse data. Despite its former `.json` name, this is a JavaScript data file that defines `data`.
 - `assets/images/` — UI images and word-search screenshots.

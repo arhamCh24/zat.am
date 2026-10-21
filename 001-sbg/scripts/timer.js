@@ -1,12 +1,20 @@
 /**
- * Small, UI-independent countdown timer.
+ * Small, UI-independent timer that supports countdown and count-up modes.
  * The scheduler dependency makes the timer straightforward to test without a browser.
  */
 export class GameTimer {
-  constructor({ duration = 30, onTick = () => {}, onExpire = () => {}, scheduler = globalThis } = {}) {
+  constructor({
+    duration = 30,
+    direction = "down",
+    onTick = () => {},
+    onExpire = () => {},
+    scheduler = globalThis,
+  } = {}) {
     const parsedDuration = Number(duration);
     this.duration = Number.isFinite(parsedDuration) ? Math.max(0, Math.floor(parsedDuration)) : 0;
+    this.direction = direction === "up" ? "up" : "down";
     this.remaining = this.duration;
+    this.elapsed = 0;
     this.onTick = onTick;
     this.onExpire = onExpire;
     this.scheduler = scheduler;
@@ -23,9 +31,9 @@ export class GameTimer {
       return;
     }
 
-    this.onTick(this.remaining);
+    this.onTick(this.direction === "up" ? this.elapsed : this.remaining);
 
-    if (this.remaining === 0) {
+    if (this.direction === "down" && this.remaining === 0) {
       this.expire();
       return;
     }
@@ -34,7 +42,13 @@ export class GameTimer {
   }
 
   tick() {
-    if (this.expired) {
+    if (this.expired || !this.isRunning) {
+      return;
+    }
+
+    if (this.direction === "up") {
+      this.elapsed += 1;
+      this.onTick(this.elapsed);
       return;
     }
 

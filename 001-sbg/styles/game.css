@@ -10,12 +10,12 @@ html {
 }
 
 body.zatam-word-search-game {
-  min-width: 20rem;
+  min-width: 0;
   font-family: var(--zatam-font);
 }
 
-body.zatam-word-search-game button,
-body.zatam-word-search-game select {
+.game-page button,
+.game-page select {
   font: inherit;
 }
 
@@ -24,7 +24,26 @@ body.zatam-word-search-game [hidden] {
 }
 
 .game-page {
-  width: 100%;
+  width: min(calc(100% - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)), var(--zatam-content-width));
+}
+
+.game-page .zatam-game-btn,
+.game-page select,
+.game-page summary {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.game-page summary {
+  align-content: center;
+  cursor: pointer;
+  color: var(--zatam-heading);
+  font-weight: 700;
+}
+
+.game-page :is(summary, select, #gridParent):focus-visible {
+  outline: 3px solid var(--zatam-blue);
+  outline-offset: 3px;
 }
 
 .game-header .mangalam {
@@ -35,9 +54,12 @@ body.zatam-word-search-game [hidden] {
 }
 
 .verse-preview {
-  margin-top: 0.9rem !important;
+  margin-top: 0.4rem !important;
   color: var(--zatam-heading);
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  scroll-margin-top: calc(var(--zatam-navbar-height, 100px) + 1rem);
 }
 
 #lead2 {
@@ -45,7 +67,18 @@ body.zatam-word-search-game [hidden] {
 }
 
 .nob {
-  display: inline;
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.08rem 0.15rem;
+  border: 1px solid transparent;
+  border-radius: 0.3rem;
+}
+
+.verse-preview .is-hint {
+  color: #573900;
+  background: #ffe19a;
+  border-color: #d89317;
+  box-shadow: 0 1px 0 rgb(117 72 0 / 18%);
 }
 
 .game-layout {
@@ -60,6 +93,42 @@ body.zatam-word-search-game [hidden] {
   gap: 1rem;
 }
 
+.game-settings {
+  min-width: 0;
+}
+
+.game-settings > summary {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--zatam-border);
+  border-radius: var(--zatam-radius-sm);
+  background: var(--zatam-white);
+}
+
+.puzzle-summary {
+  display: inline-block;
+  margin-inline-start: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.game-settings[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
+.game-controls .zatam-game-card + .zatam-game-card {
+  margin-top: 0;
+}
+
+.verse-fields {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.verse-fields > * {
+  min-width: 0;
+}
+
 .control-group label,
 .control-group select,
 .control-group > button {
@@ -68,13 +137,14 @@ body.zatam-word-search-game [hidden] {
 }
 
 .control-group label {
-  margin: 0.75rem 0 0.3rem;
+  margin: 0 0 0.3rem;
   color: var(--zatam-heading);
   font-weight: 800;
 }
 
 .control-group select {
-  min-height: 2.7rem;
+  min-width: 0;
+  font-size: 1rem;
   padding: 0.45rem 0.7rem;
   color: var(--zatam-text);
   background: var(--zatam-white);
@@ -95,6 +165,11 @@ body.zatam-word-search-game [hidden] {
   width: 100%;
 }
 
+.difficulty-button[aria-pressed="true"] {
+  color: var(--zatam-white);
+  background: var(--zatam-navy);
+}
+
 button:disabled,
 select:disabled {
   cursor: not-allowed;
@@ -104,25 +179,56 @@ select:disabled {
 .game-board {
   display: grid;
   min-width: 0;
+  margin-top: 0;
   place-items: center;
 }
 
 #gridParent {
-  display: grid;
-  width: min(100%, 42rem);
-  place-items: center;
+  width: 100%;
+  max-width: 40rem;
+  min-width: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  overscroll-behavior-x: contain;
+  scroll-margin-top: calc(var(--zatam-navbar-height, 100px) + 1rem);
 }
 
 #grid {
   position: relative;
-  width: min(74vmin, 40rem);
-  max-width: 100%;
+  width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--word-grid-background);
   border: 0.3rem solid var(--word-grid-border);
   border-radius: var(--zatam-radius);
   box-shadow: var(--zatam-shadow);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.grid-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 40rem;
+  margin-bottom: 0.5rem;
+  color: var(--zatam-muted);
+  font-size: 0.875rem;
+}
+
+.game-feedback {
+  width: 100%;
+  min-height: 3.5rem;
+}
+
+.game-feedback .zatam-game-status {
+  margin: 0.5rem 0 0;
+  padding: 0.5rem;
+  font-size: 0.875rem;
 }
 
 #grid[aria-disabled="true"] {
@@ -141,8 +247,9 @@ select:disabled {
   padding: 0;
   overflow: hidden;
   color: var(--zatam-heading);
-  font-size: clamp(0.9rem, 3.7vmin, 2rem);
-  line-height: 1;
+  font-size: 1.125rem;
+  font-size: clamp(0.875rem, calc(52cqw / var(--grid-size)), 2rem);
+  line-height: 1.5;
   text-align: center;
   vertical-align: middle;
   background: var(--word-cell-background);
@@ -212,50 +319,6 @@ select:disabled {
   object-fit: contain;
 }
 
-.hint-popup {
-  z-index: 5500;
-}
-
-.hint-popup .content {
-  width: min(100%, 34rem);
-}
-
-.hint-popup-header {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.hint-popup-header h2 {
-  margin: 0;
-}
-
-.hint-close {
-  display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  padding: 0;
-  color: var(--zatam-heading);
-  font-size: 1.5rem;
-  line-height: 1;
-  background: transparent;
-  border: 1px solid var(--zatam-border);
-  border-radius: 50%;
-  place-items: center;
-}
-
-.hint-close:hover {
-  background: var(--zatam-soft);
-}
-
-#answers {
-  display: grid;
-  gap: 0.35rem;
-  margin: 1rem 0 0;
-  padding-left: 1.4rem;
-}
-
 .game-footer {
   margin-top: 1.5rem;
   color: var(--zatam-muted);
@@ -267,26 +330,165 @@ select:disabled {
   color: var(--zatam-navy);
 }
 
-@media (max-width: 45rem) {
+/* Keep the shared site navigation contained on this game's small screens. */
+@media (max-width: 75rem) {
+  body.zatam-word-search-game #navbar-mount .zatam-header {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px max(12px, env(safe-area-inset-right, 0px)) 4px max(12px, env(safe-area-inset-left, 0px));
+  }
+
+  body.zatam-word-search-game #navbar-mount .zatam-nav {
+    order: 3;
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    gap: 16px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  body.zatam-word-search-game #navbar-mount .zatam-nav a {
+    flex-shrink: 0;
+    height: 44px;
+  }
+
+  body.zatam-word-search-game #navbar-mount .zatam-nav a.active::after {
+    bottom: 2px;
+  }
+
+  body.zatam-word-search-game #navbar-mount :is(.zatam-lang-btn, .zatam-login-btn, .zatam-signup-btn) {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 64rem) {
+  .game-page {
+    padding: 8px 0 calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .game-header {
+    margin-bottom: 12px;
+  }
+
+  .game-header .mangalam {
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+
+  .game-header :is(.zatam-game-subtitle, .zatam-game-eyebrow) {
+    display: none;
+  }
+
+  .game-page .zatam-game-instructions {
+    margin-bottom: 12px;
+    padding: 4px 10px 10px;
+  }
+
+  .game-page .zatam-game-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .game-page .zatam-game-stat {
+    padding: 8px 4px;
+  }
+
+  .game-page .zatam-game-stat-value {
+    font-size: 1.125rem;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .game-page .zatam-game-stat-label {
+    font-size: 0.6875rem;
+    letter-spacing: 0;
+  }
+
   .game-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
   }
 
   .game-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  #grid {
-    width: min(88vmin, 35rem);
+  .game-page .game-board {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .game-page > .game-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 0;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px));
+    background: var(--zatam-page);
+    border-top: 1px solid var(--zatam-border);
+  }
+
+  .game-page > .game-actions > .zatam-game-btn {
+    min-width: 0;
+    width: 100%;
+    padding-inline: 8px;
+  }
+
+  .game-page .zatam-game-result {
+    padding: 16px;
+    overflow-wrap: anywhere;
   }
 }
 
 @media (max-width: 31rem) {
-  body.zatam-word-search-game {
-    min-width: 0;
+  .game-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
   }
 
-  .game-controls {
-    grid-template-columns: 1fr;
+  .game-controls .zatam-game-card {
+    padding: 12px;
+  }
+
+  .verse-fields {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: end;
+  }
+
+  .difficulty-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .difficulty-options .zatam-game-btn {
+    min-width: 0;
+    padding-inline: 4px;
+  }
+
+  .grid-tools {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (hover: none) {
+  .game-page .zatam-game-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #grid td.is-mistake {
+    animation: none;
+    background: #ffd9d5;
   }
 }

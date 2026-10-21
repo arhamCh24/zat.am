@@ -10,7 +10,6 @@ import {
 } from "./game/scoring.js";
 import { GameTimer } from "./timer.js";
 
-const TIMER_DURATION_SECONDS = 30;
 const MARKER_CLASS_COUNT = 7;
 const SHARED_SCORE_MODULE_URL = "../../js/game-score.js";
 const SCORE_INITIALIZATION_TIMEOUT_MS = 2500;
@@ -278,13 +277,15 @@ export class WordSearchGame {
     this.window = documentRef.defaultView ?? globalThis;
     this.elements = {
       grid: documentRef.getElementById("grid"),
+      gridParent: documentRef.getElementById("gridParent"),
+      puzzleSettings: documentRef.getElementById("puzzle-settings"),
+      puzzleSummary: documentRef.getElementById("puzzle-summary"),
       timer: documentRef.getElementById("timer"),
       lead2: documentRef.getElementById("lead2"),
       presentCount: documentRef.getElementById("nPresent"),
       foundCount: documentRef.getElementById("nFound"),
       statusMessage: documentRef.getElementById("statusMessage"),
       scoreValue: documentRef.getElementById("scoreValue"),
-      mistakesValue: documentRef.getElementById("mistakesValue"),
       hintsValue: documentRef.getElementById("hintsValue"),
       resultPanel: documentRef.getElementById("resultPanel"),
       resultTitle: documentRef.getElementById("resultTitle"),
@@ -292,8 +293,6 @@ export class WordSearchGame {
       resultDetails: documentRef.getElementById("resultDetails"),
       scoreSaveStatus: documentRef.getElementById("scoreSaveStatus"),
       playAgainButton: documentRef.getElementById("play-again"),
-      answers: documentRef.getElementById("answers"),
-      hintPopup: documentRef.getElementById("hintPopup"),
       hintButton: documentRef.getElementById("hint-button"),
       chapterSelect: documentRef.getElementById("chapter-select"),
       verseSelect: documentRef.getElementById("verse-select"),
@@ -313,7 +312,6 @@ export class WordSearchGame {
     this.hintUsed = false;
     this.finalScore = null;
     this.scoreSubmissionStarted = false;
-    this.lastHintFocus = null;
     this.scoreApi = null;
     this.scoreApiReady = null;
     this.runStartedAt = null;
@@ -347,11 +345,10 @@ export class WordSearchGame {
     this.populateChapterOptions();
     this.populateVerseOptions(this.params.chapter, this.params.verse);
     this.bindEvents();
+    this.setupResponsiveControls();
     this.createPuzzle(availableWords);
-    this.renderAnswerList();
     this.renderScore();
     this.hideResult();
-    this.hideHint({ returnFocus: false });
     this.startTimer();
   }
 
@@ -384,28 +381,6 @@ export class WordSearchGame {
       this.showHint();
     });
 
-    this.elements.hintPopup?.addEventListener("click", (event) => {
-      if (event.target === this.elements.hintPopup) {
-        this.hideHint();
-      }
-    });
-
-    this.elements.hintPopup?.querySelector(".content")?.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-
-    this.elements.hintPopup?.querySelectorAll("[data-close-hint]").forEach((button) => {
-      button.addEventListener("click", () => this.hideHint());
-    });
-
-    this.document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        this.hideHint();
-      } else if (event.key === "Tab") {
-        this.trapHintFocus(event);
-      }
-    });
-
     this.elements.refreshButton?.addEventListener("click", (event) => {
       event.preventDefault();
       this.restartGame();
@@ -416,6 +391,25 @@ export class WordSearchGame {
         event.preventDefault();
         this.loadPuzzle({ size: button.dataset.size });
       });
+    });
+  }
+
+  setupResponsiveControls() {
+    const compactLayout = this.window.matchMedia?.("(max-width: 64rem)");
+    if (compactLayout && this.elements.puzzleSettings) {
+      const updateSettings = () => {
+        this.elements.puzzleSettings.open = !compactLayout.matches;
+      };
+      updateSettings();
+      compactLayout.addEventListener("change", updateSettings);
+    }
+
+    const { chapter, verse, size } = this.params;
+    if (this.elements.puzzleSummary) {
+      this.elements.puzzleSummary.textContent = `${toDevanagariNumber(chapter)}.${toDevanagariNumber(verse)} · ${size} × ${size}`;
+    }
+    this.document.querySelectorAll(".difficulty-button[data-size]").forEach((button) => {
+      button.setAttribute("aria-pressed", String(Number(button.dataset.size) === size));
     });
   }
 
@@ -562,11 +556,15 @@ export class WordSearchGame {
     const fragment = this.document.createDocumentFragment();
 
     this.verseWords.forEach((word) => {
-      const content = this.document.createElement(emphasizeAnswerWords && answerWords.has(word) ? "strong" : "span");
+      const isAnswerWord = emphasizeAnswerWords && answerWords.has(word);
+      const content = this.document.createElement("span");
       content.classList.add("nob");
+      if (isAnswerWord) {
+        content.classList.add("is-hint");
+      }
       content.title = getTransliteration(word, "iast", this.window.Sanscript);
-      content.textContent = `${word} `;
-      fragment.append(content);
+      content.textContent = word;
+      fragment.append(content, " ");
     });
 
     fragment.append(`। ${toDevanagariNumber(this.params.chapter)}.${toDevanagariNumber(this.params.verse)}`);
@@ -592,6 +590,7 @@ export class WordSearchGame {
   renderGrid(board) {
     const table = this.document.createElement("table");
     const body = this.document.createElement("tbody");
+    this.elements.gridParent.style.setProperty("--grid-size", String(board.length));
 
     this.cellElements = board.map((row, rowIndex) => {
       const tableRow = this.document.createElement("tr");
@@ -620,20 +619,6 @@ export class WordSearchGame {
     this.elements.grid.removeAttribute("aria-disabled");
   }
 
-  renderAnswerList() {
-    if (!this.elements.answers) {
-      return;
-    }
-
-    const answers = this.placedWords.map(({ word }) => {
-      const answer = this.document.createElement("li");
-      answer.textContent = word;
-      return answer;
-    });
-
-    this.elements.answers.replaceChildren(...answers);
-  }
-
   renderScore() {
     if (this.elements.presentCount) {
       this.elements.presentCount.textContent = toDevanagariNumber(this.placedWords.length);
@@ -643,9 +628,6 @@ export class WordSearchGame {
     }
     if (this.elements.scoreValue) {
       this.elements.scoreValue.textContent = String(this.getCurrentScore());
-    }
-    if (this.elements.mistakesValue) {
-      this.elements.mistakesValue.textContent = String(this.mistakes);
     }
     if (this.elements.hintsValue) {
       this.elements.hintsValue.textContent = String(this.hints);
@@ -667,9 +649,7 @@ export class WordSearchGame {
   }
 
   getElapsedSeconds() {
-    const remaining = this.timer?.remaining ?? TIMER_DURATION_SECONDS;
-
-    return Math.max(0, TIMER_DURATION_SECONDS - remaining);
+    return this.timer?.elapsed ?? 0;
   }
 
   setGameStatus(message, tone = "info") {
@@ -807,13 +787,12 @@ export class WordSearchGame {
 
   startTimer() {
     this.timer = new GameTimer({
-      duration: TIMER_DURATION_SECONDS,
-      onTick: (remaining) => {
+      direction: "up",
+      onTick: (elapsed) => {
         if (this.elements.timer) {
-          this.elements.timer.textContent = toDevanagariNumber(remaining);
+          this.elements.timer.textContent = toDevanagariNumber(elapsed);
         }
       },
-      onExpire: () => this.expireGame(),
     });
     this.timer.start();
   }
@@ -826,7 +805,6 @@ export class WordSearchGame {
     this.isActive = false;
     this.timer?.stop();
     this.elements.grid.classList.add("is-complete");
-    this.hideHint({ returnFocus: false });
     this.finalScore = this.getCurrentScore();
     this.renderScore();
     this.setGameStatus("");
@@ -868,7 +846,7 @@ export class WordSearchGame {
           gridSize: this.params.size,
           hints: this.hints,
           mistakes: this.mistakes,
-          timeRemaining: this.timer?.remaining ?? 0,
+          timeElapsed: this.getElapsedSeconds(),
           wordsFound: this.foundWords.size,
           wordsTotal: this.placedWords.length,
         },
@@ -889,28 +867,6 @@ export class WordSearchGame {
     }
   }
 
-  expireGame() {
-    if (!this.isActive) {
-      return;
-    }
-
-    this.isActive = false;
-    this.elements.grid.classList.add("is-locked");
-    this.elements.grid.setAttribute("aria-disabled", "true");
-    this.hideHint({ returnFocus: false });
-    this.setGameStatus("");
-    this.finalScore = 0;
-    if (this.elements.scoreValue) {
-      this.elements.scoreValue.textContent = "0";
-    }
-    this.showResult({
-      title: "समयः समाप्तः अस्ति।",
-      score: this.finalScore,
-      details: this.resultDetails(),
-    });
-    this.setScoreSaveStatus("Finish a full puzzle to save a score to the leaderboard.", "info");
-  }
-
   showHint() {
     if (!this.isActive) {
       return;
@@ -924,55 +880,9 @@ export class WordSearchGame {
     }
 
     this.renderVerse(true);
-    if (this.elements.hintPopup) {
-      this.lastHintFocus = this.document.activeElement;
-      this.elements.hintPopup.hidden = false;
-    }
-    this.elements.hintButton?.setAttribute("aria-expanded", "true");
-    this.elements.hintPopup?.querySelector("[data-close-hint]")?.focus();
-  }
-
-  hideHint({ returnFocus = true } = {}) {
-    const wasOpen = Boolean(this.elements.hintPopup && !this.elements.hintPopup.hidden);
-
-    if (this.elements.hintPopup) {
-      this.elements.hintPopup.hidden = true;
-    }
-    this.elements.hintButton?.setAttribute("aria-expanded", "false");
-
-    if (returnFocus && wasOpen && typeof this.lastHintFocus?.focus === "function") {
-      this.lastHintFocus.focus();
-    }
-
-    this.lastHintFocus = null;
-  }
-
-  trapHintFocus(event) {
-    const popup = this.elements.hintPopup;
-
-    if (!popup || popup.hidden) {
-      return;
-    }
-
-    const focusable = [...popup.querySelectorAll(
-      "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])",
-    )];
-
-    if (!focusable.length) {
-      event.preventDefault();
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = this.document.activeElement;
-
-    if (event.shiftKey && (active === first || !popup.contains(active))) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && (active === last || !popup.contains(active))) {
-      event.preventDefault();
-      first.focus();
+    this.elements.hintButton?.setAttribute("aria-pressed", "true");
+    if (this.window.matchMedia?.("(max-width: 64rem)")?.matches) {
+      this.elements.lead2?.scrollIntoView({ block: "center", behavior: "auto" });
     }
   }
 

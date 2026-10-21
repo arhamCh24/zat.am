@@ -67,3 +67,28 @@ test("a zero-duration timer reports zero and expires without scheduling work", (
   assert.equal(scheduler.callbacks.size, 0);
   assert.equal(timer.isRunning, false);
 });
+
+test("a count-up timer starts at zero and continues until stopped", () => {
+  const scheduler = createScheduler();
+  const ticks = [];
+  let expireCount = 0;
+  const timer = new GameTimer({
+    direction: "up",
+    onTick: (elapsed) => ticks.push(elapsed),
+    onExpire: () => { expireCount += 1; },
+    scheduler,
+  });
+
+  timer.start();
+  const [{ callback }] = scheduler.callbacks.values();
+  callback();
+  callback();
+  callback();
+  timer.stop();
+
+  assert.deepEqual(ticks, [0, 1, 2, 3]);
+  assert.equal(timer.elapsed, 3);
+  assert.equal(timer.isRunning, false);
+  assert.equal(expireCount, 0);
+  assert.equal(scheduler.clearedIds.length, 1);
+});

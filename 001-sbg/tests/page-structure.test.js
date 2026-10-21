@@ -17,7 +17,6 @@ test("the game starts as a module after the classic verse-data script", () => {
     /<script\s+src=["']data\/bhagavad-gita\.js["']><\/script>\s*<script\s+type=["']module["']\s+src=["']scripts\/game\.js["']><\/script>/,
   );
 });
-
 test("the page uses unique native controls without legacy event handlers or dependencies", () => {
   for (const id of [
     "chapter-select",
@@ -34,13 +33,23 @@ test("the page uses unique native controls without legacy event handlers or depe
   assert.doesNotMatch(indexHtml, /jquery|popper|bootstrap|timer\.css/i);
 });
 
+test("the verse selector keeps its original Go label and the hint stays in the shloka", () => {
+  assert.match(
+    indexHtml,
+    /<button[^>]*id=["']load-verse["'][^>]*>\s*Go\s*<\/button>/,
+  );
+  assert.doesNotMatch(indexHtml, /hintPopup|role=["']dialog["']/);
+  assert.match(gameScript, /showHint\(\)[\s\S]*?this\.renderVerse\(true\)/);
+  assert.match(gameScript, /content\.classList\.add\("is-hint"\)/);
+  assert.doesNotMatch(gameScript, /hintPopup|trapHintFocus|hideHint/);
+});
+
 test("the page uses the shared Zat.am game theme and score UI", () => {
   assert.match(indexHtml, /href=["']\.\.\/shared\/game-theme\.css["']/);
   assert.match(indexHtml, /class=["'][^"']*zatam-themed-game[^"']*["']/);
 
   for (const id of [
     "scoreValue",
-    "mistakesValue",
     "hintsValue",
     "resultPanel",
     "resultScore",
