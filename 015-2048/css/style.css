@@ -277,3 +277,24 @@ body {
         width: min(100%, 580px, calc(100dvh - 260px));
     }
 }
+
+.number-toggle {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    color: #79664b;
+    font-size: 14px;
+}
+
+.number-toggle label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.number-toggle input {
+    width: 18px;
+    height: 18px;
+    accent-color: #89602f;
+}

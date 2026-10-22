@@ -27,9 +27,11 @@ var Game = (function () {
             var seconds = Math.floor(this.getElapsedMs() / 1000);
             var minutes = Math.floor(seconds / 60);
 
-            timer.textContent =
+            var text =
                 String(minutes).padStart(2, '0') + ':' +
                 String(seconds % 60).padStart(2, '0');
+
+            timer.textContent = formatGameNumber(text);
         },
 
         startTimer: function () {
