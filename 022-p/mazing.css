@@ -203,9 +203,29 @@
   display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .maze-play-area {
     grid-template-columns: minmax(0, 1fr);
     gap: 14px;
+  }
+
+  .maze-board-column {
+    display: contents;
+  }
+
+  .maze-stats { grid-row: 1; }
+  #maze_container { grid-row: 2; }
+  #maze_output { grid-row: 3; }
+  .maze-controls { grid-row: 4; }
+
+  .maze-direction-pad {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .maze-direction-pad {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
