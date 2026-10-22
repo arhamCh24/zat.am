@@ -53,14 +53,12 @@ var View = (function () {
                 scoreAddition.classList.remove('action');
             }, 500);
         },
-        updateScore: function (score) {
-            //scoreDom.innerHTML = data.score;
-			formatGameNumber(data.score)
-            //this.addScoreAnimation(score);
+        updateScore: function () {
+            scoreDom.textContent = formatGameNumber(data.score);
         },
+
         updateBest: function () {
-            //bestDom.innerHTML = data.best;
-			formatGameNumber(data.best)
+            bestDom.textContent = formatGameNumber(data.best);
         },
         setInfo: function (elem, pos, index) {
             elem.style.left = pos.left + 'px';

@@ -188,13 +188,15 @@ var Game = (function () {
                 };
             }
         },
-        addScore: function (score) {
-            data.score += score;
-            if (data.best < data.score) {
+        addScore: function (points) {
+            data.score += points;
+
+            if (data.score > data.best) {
                 data.best = data.score;
-                this.view.updateBest();
             }
-            this.view.updateScore(score);
+
+            this.view.updateScore();
+            this.view.updateBest();
         },
         chunkX: function () {
             var new_cell = [];
