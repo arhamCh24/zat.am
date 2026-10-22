@@ -41,7 +41,7 @@
           <select id="minute-select" aria-label="Minute"></select>
         </label>
       </div>
-      <button class="zatam-game-btn zatam-game-btn-secondary" type="button" onclick="updtxt()">Update (approx.) समयः</button>
+      <button class="zatam-game-btn zatam-game-btn-secondary" type="button" onclick="updateSelectedTime()">Update (approx.) समयः</button>
     </div>
     <div class="zatam-game-actions clock-live-actions">
       <button id="golive" class="zatam-game-btn zatam-game-btn-primary" type="button" onclick="golive()">Show live समयः</button>
@@ -75,17 +75,12 @@ for (let value = 0; value < 60; value++) {
 }
 hourSelect.value = String(hh % 12 || 12);
 minuteSelect.value = String(mm);
-hourSelect.addEventListener("change", updateTimeUrl);
-minuteSelect.addEventListener("change", updateTimeUrl);
 
 function updateTimeUrl() {
   const nextUrl = new URL(window.location.href);
-  const baseHour = curr ? new Date().getHours() : hh;
-  const hourPeriod = Math.floor(baseHour / 12);
-  const selectedHour = Number(hourSelect.value) % 12;
-  nextUrl.searchParams.set("hh", String(hourPeriod * 12 + selectedHour));
-  nextUrl.searchParams.set("mm", minuteSelect.value);
-  window.location.href = nextUrl.toString();
+  nextUrl.searchParams.set("hh", String(hh));
+  nextUrl.searchParams.set("mm", String(mm));
+  window.history.replaceState(null, "", nextUrl.toString());
 }
 
 const canvas = document.getElementById("canvas");
@@ -93,7 +88,8 @@ const ctx = canvas.getContext("2d");
 let radius = canvas.height / 2;
 ctx.translate(radius, radius);
 radius = radius * 0.90;
-if (curr) setInterval(drawClock, 1000);
+let clockInterval = null;
+if (curr) clockInterval = setInterval(drawClock, 1000);
   else 
 { drawClock();
  updtxt();}
@@ -182,6 +178,19 @@ function drawHand(ctx, pos, length, width) {
     ctx.rotate(-pos);
 }
 
+function updateSelectedTime()
+{
+const baseHour = curr ? new Date().getHours() : hh;
+const hourPeriod = Math.floor(baseHour / 12);
+const selectedHour = Number(hourSelect.value) % 12;
+hh = hourPeriod * 12 + selectedHour;
+mm = Number(minuteSelect.value);
+curr = false;
+updateTimeUrl();
+drawClock();
+updtxt();
+}
+
 function updtxt()
 {
 let samayaH = "";
@@ -264,15 +273,15 @@ document.getElementById("samayaH").textContent = samayaH;
 
 function golive()
 {
- if (!curr)
- {
-  curr=true;
-  const liveUrl = new URL(window.location.href);
-  liveUrl.searchParams.delete("hh");
-  liveUrl.searchParams.delete("mm");
-  window.history.replaceState(null, "", liveUrl.toString());
-  setInterval(drawClock, 1000);
- }
+ curr=true;
+ const liveUrl = new URL(window.location.href);
+ liveUrl.searchParams.delete("hh");
+ liveUrl.searchParams.delete("mm");
+ window.history.replaceState(null, "", liveUrl.toString());
+ const now = new Date();
+ hourSelect.value = String(now.getHours() % 12 || 12);
+ minuteSelect.value = String(now.getMinutes());
+ if (!clockInterval) clockInterval = setInterval(drawClock, 1000);
 drawClock();
 updtxt();
 }
