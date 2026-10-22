@@ -19,9 +19,7 @@ body.leaderboard-page {
   box-sizing: border-box;
 }
 
-/* =====================================================
-   SPARKLE CANVAS
-===================================================== */
+/*  SPARKLE CANVAS */
 
 #sparkleCanvas {
   position: fixed;
@@ -36,9 +34,7 @@ body.leaderboard-page {
   z-index: 20;
 }
 
-/* =====================================================
-   PAGE CONTAINER
-===================================================== */
+/* PAGE CONTAINER */
 
 .lb-page {
   width: 100%;
@@ -53,9 +49,7 @@ body.leaderboard-page {
   z-index: 1;
 }
 
-/* =====================================================
-   HERO
-===================================================== */
+/* HERO */
 
 .lb-hero {
   display: flex;
@@ -173,9 +167,7 @@ body.leaderboard-page {
   box-shadow: 0 6px 16px rgba(11, 43, 79, 0.12);
 }
 
-/* =====================================================
-   MAIN LAYOUT
-===================================================== */
+/* MAIN LAYOUT */
 
 .lb-layout {
   display: grid;
@@ -193,9 +185,7 @@ body.leaderboard-page {
   min-width: 0;
 }
 
-/* =====================================================
-   COMMON CARDS
-===================================================== */
+/* COMMON CARDS */
 
 .lb-filter-card,
 .leaderboard-card,
@@ -210,9 +200,7 @@ body.leaderboard-page {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* =====================================================
-   SECTION HEADINGS
-===================================================== */
+/* SECTION HEADINGS */
 
 .lb-section-heading {
   display: flex;
@@ -257,9 +245,7 @@ body.leaderboard-page {
   text-align: right;
 }
 
-/* =====================================================
-   FILTER CARD
-===================================================== */
+/* FILTER CARD */
 
 .lb-filter-card {
   margin-bottom: 26px;
@@ -331,9 +317,7 @@ body.leaderboard-page {
   box-shadow: 0 0 0 3px rgba(246, 178, 59, 0.14);
 }
 
-/* =====================================================
-   SCORING TOGGLE
-===================================================== */
+/* SCORING TOGGLE */
 
 .lb-score-toggle {
   min-height: 42px;
@@ -392,17 +376,13 @@ body.leaderboard-page {
   color: white;
 }
 
-/* =====================================================
-   RANKING SECTION
-===================================================== */
+/* RANKING SECTION */
 
 .lb-ranking-section {
   margin-bottom: 26px;
 }
 
-/* =====================================================
-   PODIUM
-===================================================== */
+/* PODIUM */
 
 .podium {
   min-height: 260px;
@@ -544,9 +524,7 @@ body.leaderboard-page {
   font-weight: 800;
 }
 
-/* =====================================================
-   LEADERBOARD CARD
-===================================================== */
+/* LEADERBOARD CARD */
 
 .leaderboard-card {
   overflow: hidden;
@@ -574,9 +552,7 @@ body.leaderboard-page {
   font-weight: 800;
 }
 
-/* =====================================================
-   GENERATED LEADERBOARD ROWS
-===================================================== */
+/* GENERATED LEADERBOARD ROWS */
 
 #leaderboard {
   width: 100%;
@@ -671,9 +647,7 @@ body.leaderboard-page {
   white-space: nowrap;
 }
 
-/* =====================================================
-   PAGINATION
-===================================================== */
+/* PAGINATION */
 
 .pagination {
   min-height: 64px;
@@ -741,9 +715,7 @@ body.leaderboard-page {
   color: #0b2b4f;
 }
 
-/* =====================================================
-   SIDEBAR
-===================================================== */
+/* SIDEBAR */
 
 .lb-sidebar {
   display: flex;
@@ -782,9 +754,7 @@ body.leaderboard-page {
   line-height: 1.5;
 }
 
-/* =====================================================
-   SIDEBAR TIPS
-===================================================== */
+/* SIDEBAR TIPS */
 
 .lb-tip-list {
   display: flex;
@@ -832,17 +802,13 @@ body.leaderboard-page {
   line-height: 1.4;
 }
 
-/* =====================================================
-   COMPETITION CARD
-===================================================== */
+/* COMPETITION CARD */
 
 .lb-competition-card {
   background: linear-gradient(145deg, #ffffff, #fff7e8);
 }
 
-/* =====================================================
-   ADMIN PANEL
-===================================================== */
+/* ADMIN PANEL */
 
 .admin-panel {
   text-align: left !important;
@@ -901,9 +867,7 @@ body.leaderboard-page {
   line-height: 1.4;
 }
 
-/* =====================================================
-   TOGGLE SWITCH
-===================================================== */
+/* TOGGLE SWITCH */
 
 .toggle-switch {
   width: 44px;
@@ -965,9 +929,7 @@ body.leaderboard-page {
   transform: translateX(20px);
 }
 
-/* =====================================================
-   BOTTOM INFORMATION
-===================================================== */
+/* BOTTOM INFORMATION */
 
 .bottom-info {
   display: grid;
@@ -1014,9 +976,7 @@ body.leaderboard-page {
   line-height: 1.4;
 }
 
-/* =====================================================
-   TABLET
-===================================================== */
+/* TABLET */
 
 @media (max-width: 1100px) {
   .lb-layout {
@@ -1054,9 +1014,7 @@ body.leaderboard-page {
   }
 }
 
-/* =====================================================
-   MOBILE
-===================================================== */
+/* MOBILE */
 
 @media (max-width: 700px) {
   .lb-page {
@@ -1161,9 +1119,7 @@ body.leaderboard-page {
   }
 }
 
-/* =====================================================
-   SMALL MOBILE
-===================================================== */
+/* SMALL MOBILE */
 
 @media (max-width: 460px) {
   .lb-hero-actions {
@@ -1295,9 +1251,7 @@ body.leaderboard-page {
   opacity: 0.72;
 }
 
-/* =====================================================
-   TABLES
-===================================================== */
+/* TABLES */
 
 .leaderboard-table-header {
   display: grid;
@@ -1474,9 +1428,7 @@ body.leaderboard-page {
   text-align: center;
 }
 
-/* =====================================================
-   SIDEBAR - MY RANK
-===================================================== */
+/* SIDEBAR - MY RANK */
 
 .lb-side-heading {
   display: flex;
@@ -1597,9 +1549,7 @@ body.leaderboard-page {
   line-height: 1.5;
 }
 
-/* =====================================================
-   SIDEBAR - RECENT HISTORY
-===================================================== */
+/* SIDEBAR - RECENT HISTORY */
 
 .lb-text-action {
   flex-shrink: 0;
@@ -1671,9 +1621,7 @@ body.leaderboard-page {
   font-weight: 900;
 }
 
-/* =====================================================
-   ADMIN
-===================================================== */
+/* ADMIN */
 
 .lb-admin-context {
   margin: 0 0 4px !important;
@@ -1681,9 +1629,7 @@ body.leaderboard-page {
   font-size: 11px !important;
 }
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+/* RESPONSIVE */
 
 @media (max-width: 1180px) {
   .lb-controls {
@@ -1778,9 +1724,7 @@ body.leaderboard-page {
   }
 }
 
-/* =====================================================
-   ALL-GAMES GROUPED LEADERBOARD
-===================================================== */
+/* ALL-GAMES GROUPED LEADERBOARD */
 
 .leaderboard-table-header-game-all,
 #leaderboard .row-game-all {
@@ -1827,9 +1771,7 @@ body.leaderboard-page {
   }
 }
 
-/* =====================================================
-   ALL-GAMES GROUPED LEADERBOARD
-===================================================== */
+/* ALL-GAMES GROUPED LEADERBOARD */
 
 .leaderboard-table-header-game-all,
 #leaderboard .row-game-all {

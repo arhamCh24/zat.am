@@ -98,11 +98,7 @@ export async function getLeaderboardGames() {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/*
-=====================================================
-CHECK WHETHER FIRESTORE NEEDS TO BE FETCHED AGAIN
-=====================================================
-*/
+/* CHECK WHETHER FIRESTORE NEEDS TO BE FETCHED AGAIN */
 
 export function checkFetchRequirements(
   startDate,
@@ -144,11 +140,7 @@ GET RAW LEADERBOARD HISTORY
 export async function getRawData(start, end, selectedGame) {
   const historyDocuments = [];
 
-  /*
-  -----------------------------------------------------
-  ALL DATES
-  -----------------------------------------------------
-  */
+  /* ALL DATES */
 
   if (start === 0) {
     const gameHistoryRef = collection(
