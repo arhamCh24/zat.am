@@ -564,3 +564,479 @@ body {
     line-height: 1.6;
     opacity: 1;
 }
+
+/* =========================
+   WIDER, WARMER 2048 LAYOUT
+========================= */
+
+html,
+body {
+    background: #faf6ed;
+    color: #493820;
+    font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Cover most of the page */
+.container.game-2048 {
+    width: 90%;
+    max-width: 1800px;
+    padding: 24px 0 40px;
+}
+
+.game-heading {
+    margin-bottom: 20px;
+}
+
+.game-eyebrow {
+    color: #946329;
+    font-family: inherit;
+}
+
+.game-heading h1 {
+    color: #493820;
+    font-family: inherit;
+    font-size: clamp(42px, 5vw, 68px);
+}
+
+.game-heading p {
+    color: #79664b;
+    font-size: 17px;
+}
+
+/* Wide, low dashboard controls */
+.game-toolbar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.game-toolbar .game-stat {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-content: center;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 4px;
+    min-height: 82px;
+    padding: 14px 22px;
+    border: 1px solid #ddcbae;
+    border-radius: 8px;
+    background: #fffdf7;
+    color: #493820;
+    text-align: left;
+    box-shadow: 0 3px 12px rgba(91, 65, 28, 0.05);
+}
+
+.game-stat-label {
+    grid-column: 1;
+    margin: 0;
+    color: #79664b;
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.game-stat strong {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    justify-self: end;
+    color: #493820;
+    font-family: inherit;
+    font-size: clamp(24px, 2.6vw, 38px);
+    overflow-wrap: anywhere;
+}
+
+.game-stat-detail {
+    grid-column: 1;
+    margin: 0;
+    color: #8a7556;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.game-toolbar .restart-btn {
+    min-height: 82px;
+    padding: 14px 22px;
+    border: 1px solid #775126;
+    border-radius: 8px;
+    background: #89602f;
+    color: #fffaf0;
+    font-family: inherit;
+    font-size: 22px;
+}
+
+.game-toolbar .restart-btn:hover {
+    background: #704b24;
+}
+
+.game-toolbar .restart-btn:focus-visible {
+    outline-color: #bd842d;
+}
+
+/* Compact instructions across the page */
+.game-instructions {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin-bottom: 20px;
+    padding: 14px 20px;
+    border-color: #ddcbae;
+    border-radius: 8px;
+    background: #fffdf7;
+}
+
+.game-instructions > strong {
+    flex-shrink: 0;
+    margin: 0;
+    color: #493820;
+}
+
+.game-instructions p {
+    color: #79664b;
+    font-family: inherit;
+    font-size: 15px;
+}
+
+.game-instructions b {
+    color: #493820;
+}
+
+/* Large square board with sharp outer corners */
+.game-2048 .game-container {
+    width: 100%;
+    max-width: 1500px;
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 auto;
+    border-radius: 0;
+    background: #b59a65;
+    box-shadow: 0 10px 30px rgba(91, 65, 28, 0.12);
+}
+
+/* Scale text relative to the board */
+.game-2048 .tile-container {
+    container-type: inline-size;
+}
+
+.game-2048 .grid-cell,
+.game-2048 .tile {
+    border-radius: 0;
+}
+
+.game-2048 .grid-cell {
+    background: #dac9a4;
+}
+
+.game-2048 .tile {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(28px, 11cqw, 150px);
+}
+
+.game-2048 .tile[data-val="128"],
+.game-2048 .tile[data-val="256"],
+.game-2048 .tile[data-val="512"] {
+    font-size: clamp(23px, 9cqw, 120px);
+}
+
+.game-2048 .tile[data-val="1024"],
+.game-2048 .tile[data-val="2048"] {
+    font-size: clamp(18px, 7cqw, 96px);
+}
+
+/* Warm result overlays */
+.game-2048 .pop-container {
+    border-radius: 0;
+    background: rgba(250, 246, 237, 0.95);
+    color: #493820;
+    font-family: inherit;
+}
+
+.game-2048 .pop-container span,
+.game-2048 .footer {
+    color: #79664b;
+}
+
+/* Keep the toolbar horizontal on smaller screens */
+@media screen and (max-width: 760px) {
+    .container.game-2048 {
+        width: 94%;
+        padding-top: 20px;
+    }
+
+    .game-toolbar {
+        gap: 6px;
+    }
+
+    .game-toolbar .game-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-height: 76px;
+        padding: 10px 4px;
+        text-align: center;
+    }
+
+    .game-stat-label {
+        font-size: 10px;
+    }
+
+    .game-stat strong {
+        font-size: 23px;
+    }
+
+    .game-stat-detail {
+        display: none;
+    }
+
+    .game-toolbar .restart-btn {
+        min-height: 76px;
+        padding: 10px 4px;
+        font-size: 16px;
+    }
+
+    .game-instructions {
+        display: block;
+        padding: 12px 14px;
+    }
+
+    .game-instructions > strong {
+        margin-bottom: 6px;
+    }
+}
+
+/* Wide page layout */
+body .game-2048 {
+    display: block;
+    width: 80vw;
+    max-width: none;
+    height: auto;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 24px 0 40px;
+    box-sizing: border-box;
+}
+
+/* Compact heading */
+.game-2048 .game-heading {
+    margin-bottom: 18px;
+}
+
+.game-2048 .game-heading h1 {
+    margin-bottom: 6px;
+    font-size: 48px;
+}
+
+/* Four wide, short controls */
+.game-2048 .game-toolbar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.game-2048 .game-toolbar .game-stat,
+.game-2048 .game-toolbar .restart-btn {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    min-width: 0;
+    width: 100%;
+    height: 76px;
+    min-height: 0;
+    margin: 0;
+    padding: 12px 18px;
+    box-sizing: border-box;
+    border-radius: 6px;
+}
+
+.game-2048 .game-stat-label {
+    margin: 0;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.game-2048 .game-stat strong {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.game-2048 .game-stat-detail,
+.game-2048 .score-addition {
+    display: none;
+}
+
+.game-2048 .game-toolbar .restart-btn {
+    font-size: 22px;
+    white-space: nowrap;
+}
+
+/* Instructions use the full width */
+.game-2048 .game-instructions {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    width: 100%;
+    padding: 14px 20px;
+    margin-bottom: 18px;
+    box-sizing: border-box;
+}
+
+.game-2048 .game-instructions > strong {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+/* Board fills the page wrapper */
+.game-2048 .game-container {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0;
+    border-radius: 0;
+    background: #b59a65;
+}
+
+.game-2048 .grid-cell,
+.game-2048 .tile {
+    border-radius: 0;
+}
+
+.game-2048 .grid-cell {
+    background: #dac9a4;
+}
+
+/* Smaller screens */
+@media screen and (max-width: 760px) {
+    body .game-2048 {
+        width: 94vw;
+        padding-top: 18px;
+    }
+
+    .game-2048 .game-toolbar {
+        gap: 6px;
+    }
+
+    .game-2048 .game-toolbar .game-stat,
+    .game-2048 .game-toolbar .restart-btn {
+        flex-direction: column;
+        gap: 8px;
+        height: 74px;
+        padding: 8px 4px;
+    }
+
+    .game-2048 .game-stat-label {
+        font-size: 10px;
+    }
+
+    .game-2048 .game-stat strong {
+        font-size: 22px;
+    }
+
+    .game-2048 .game-toolbar .restart-btn {
+        font-size: 14px;
+    }
+
+    .game-2048 .game-instructions {
+        display: block;
+    }
+
+    .game-2048 .game-instructions > strong {
+        margin-bottom: 6px;
+    }
+}
+
+/* Center the page and reduce vertical spacing */
+body .game-2048 {
+    width: 80%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 12px 0;
+}
+
+.game-2048 .game-heading {
+    margin-bottom: 10px;
+}
+
+.game-2048 .game-eyebrow {
+    margin-bottom: 4px;
+}
+
+.game-2048 .game-heading h1 {
+    margin-bottom: 4px;
+    font-size: 36px;
+}
+
+.game-2048 .game-heading p {
+    font-size: 14px;
+}
+
+.game-2048 .game-toolbar {
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.game-2048 .game-toolbar .game-stat,
+.game-2048 .game-toolbar .restart-btn {
+    height: 60px;
+    padding: 8px 14px;
+}
+
+.game-2048 .game-stat strong {
+    font-size: 28px;
+}
+
+.game-2048 .game-instructions {
+    margin-bottom: 12px;
+    padding: 10px 16px;
+}
+
+.game-2048 .game-instructions p {
+    font-size: 14px;
+}
+
+/* Center a square board that fits below the controls */
+.game-2048 .game-container {
+    width: min(100%, 680px, calc(100dvh - 310px));
+    height: auto;
+    aspect-ratio: 1;
+    margin: 0 auto;
+}
+
+.game-2048 .footer {
+    padding-top: 10px;
+    font-size: 11px;
+}
+
+@media screen and (max-width: 760px) {
+    body .game-2048 {
+        width: 94%;
+        margin: 0 auto;
+    }
+
+    .game-2048 .game-toolbar {
+        gap: 6px;
+    }
+
+    .game-2048 .game-toolbar .game-stat,
+    .game-2048 .game-toolbar .restart-btn {
+        height: 64px;
+        padding: 8px 4px;
+    }
+
+    .game-2048 .game-stat strong {
+        font-size: 22px;
+    }
+
+    .game-2048 .game-container {
+        width: min(100%, 680px, calc(100dvh - 340px));
+    }
+}
