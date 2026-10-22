@@ -41,12 +41,6 @@
       version="1.1"
       overflow="auto"
     >
-      <defs>
-        <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="var(--zatam-coral)" />
-          <stop offset="100%" stop-color="var(--zatam-blue)" />
-        </linearGradient>
-      </defs>
       <!-- 
     Johan Karlsson, 2020
     https://twitter.com/DonKarlssonSan 
@@ -132,6 +126,7 @@
       var colors = ["gold", "coral", "blue", "muted", "success"].map(getThemeColor);
       const correctStroke = getThemeColor("blue");
       const incorrectStroke = getThemeColor("coral");
+      const successFill = getThemeColor("success-soft");
       /*
   Johan Karlsson, 2020
   https://twitter.com/DonKarlssonSan
@@ -415,6 +410,7 @@
         if (evt.target.innerHTML == val) {
           evt.target.onclick = "";
           evt.target.setAttribute("stroke", correctStroke);
+          evt.target.setAttribute("fill", successFill);
           found++;
           publishGameStats();
           document.getElementById("remain").innerHTML =
@@ -474,7 +470,7 @@
         for (var i = 0; i < txtnods.length; i++) {
           if (txtnods[i].innerHTML == val)
             if (txtnods[i].getAttribute("stroke") != correctStroke) {
-              txtnods[i].setAttribute("stroke", "url(#linear)");
+              txtnods[i].setAttribute("stroke", getThemeColor("danger"));
               txtnods[i].setAttribute("stroke-width", "2.5");
               //txtnods[i].classList.add("blinkclass");
               //txtnods[i].setAttribute("stroke","tomato");

@@ -12,7 +12,7 @@ circle{
 stroke-width : 3;
 }
 circle:hover{
-fill:var(--zatam-white);
+fill:var(--zatam-border);
 }
 svg {
   position: relative;
@@ -23,6 +23,9 @@ svg {
 }
 text{
 cursor:pointer;
+fill:var(--zatam-white);
+font-size:1.35em;
+font-weight:700;
 }
 .mode-ui { padding: 12px; text-align: center; }
 .mode-controls { flex-wrap: nowrap; flex-direction: row; align-items: center; gap: 12px; margin-top: 0; overflow-x: auto; justify-content: center; }
@@ -40,12 +43,6 @@ cursor:pointer;
 </div>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" version="1.1" overflow="hidden">
-<defs>
-    <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="var(--zatam-coral)"/>
-      <stop offset="100%" stop-color="var(--zatam-blue)"/>
-    </linearGradient>
-  </defs>
 </svg>
 <script>
 "use strict";
@@ -58,9 +55,15 @@ var found=0;
 	set=0;
  const getThemeColor = (name) => getComputedStyle(document.documentElement)
    .getPropertyValue(`--zatam-${name}`).trim();
- var colors = ["gold", "coral", "blue", "muted", "success", "border"].map(getThemeColor);
+ var colors = ["gold", "coral", "blue", "muted", "success"].map(getThemeColor);
  const correctStroke = getThemeColor("blue");
  const incorrectStroke = getThemeColor("coral");
+ const successFill = getThemeColor("success-soft");
+ const dangerSoftFill = getThemeColor("danger-soft");
+ const getCircleForSymbol = (symbol) => Array.from(document.querySelectorAll("circle")).find((circle) =>
+   circle.getAttribute("cx") === symbol.getAttribute("x") &&
+   circle.getAttribute("cy") === symbol.getAttribute("y")
+ );
 const svgNs = "http://www.w3.org/2000/svg";
 let svg;
 let w;
@@ -90,6 +93,8 @@ if (evt.target.innerHTML==val)
 {
 evt.target.onclick="";
 evt.target.setAttribute("stroke",correctStroke);
+const correctCircle = getCircleForSymbol(evt.target);
+if (correctCircle) correctCircle.setAttribute("fill", successFill);
 found++;
 publishGameStats();
   document.getElementById("remain").innerHTML = " Still to find : "
@@ -106,6 +111,8 @@ for (var i=0;i<txtnods.length;i++){
 else 
 {
 evt.target.setAttribute("stroke",incorrectStroke);
+const incorrectCircle = getCircleForSymbol(evt.target);
+if (incorrectCircle) incorrectCircle.setAttribute("fill", dangerSoftFill);
 wt++;
 publishGameStats();
 }
@@ -113,11 +120,25 @@ publishGameStats();
 
 function getRandomPoints() {
   let pointList = [];
-  let div = Math.random() * 3000 + 1000;
-  let nrOfPoints = w * h / div;
-  for(let i = 0; i < nrOfPoints; i++) {
-    pointList.push({x: Math.random() * w, y: Math.random() * h});
+  const targetCount = Math.floor((w * h) / 2800);
+  let attempts = 0;
+  const maxAttempts = targetCount * 40;
+
+  while(pointList.length < targetCount && attempts < maxAttempts) {
+    attempts++;
+    const r = Math.floor(Math.random() * 31) + 4;
+    const point = {
+      x: r + Math.random() * (w - 2 * r),
+      y: r + Math.random() * (h - 2 * r),
+      r,
+    };
+    const overlaps = pointList.some((other) =>
+      Math.hypot(point.x - other.x, point.y - other.y) < (r + other.r) * 0.9,
+    );
+
+    if(!overlaps) pointList.push(point);
   }
+
   return pointList;
 }
 
@@ -139,7 +160,7 @@ document.getElementById("msg").innerHTML = " " + minvalue + " instances of <stro
 
 function createGElement(circ, labelLayer) {
 let gElement = document.createElementNS(svgNs, "g");
-let r=Math.floor(Math.random() * 25);
+let r=circ.r;
   let circElement = document.createElementNS(svgNs, "circle");
   circElement.setAttribute("cx", circ.x);
   circElement.setAttribute("cy", circ.y);
@@ -148,7 +169,7 @@ let r=Math.floor(Math.random() * 25);
   
   gElement.appendChild(circElement);
   
- if (r>12)
+ if (r>18)
  {
   let textElement = document.createElementNS(svgNs, "text");
   textElement.setAttribute("x", circ.x);
@@ -170,7 +191,7 @@ for (var i=0;i<txtnods.length;i++){
   if (txtnods[i].innerHTML == val)
      if (txtnods[i].getAttribute("stroke") != correctStroke)
 	 {
-	 	     txtnods[i].setAttribute("stroke","url(#linear)");
+             txtnods[i].setAttribute("stroke", getThemeColor("danger"));
 			 txtnods[i].setAttribute("stroke-width","2.5");
 		 }
 }

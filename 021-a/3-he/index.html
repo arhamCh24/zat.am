@@ -21,6 +21,9 @@ fill:var(--zatam-border)}
 text{
 cursor:pointer;
 stroke-width:2;
+fill:var(--zatam-white);
+font-size:1.35em;
+font-weight:700;
 }
 text:hover{
 stroke:var(--zatam-navy);
@@ -42,12 +45,6 @@ font-size:2.5em;
 </div>
 </div>
 <svg id="s" >
-<defs>
-    <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="var(--zatam-coral)"/>
-      <stop offset="100%" stop-color="var(--zatam-blue)"/>
-    </linearGradient>
-  </defs>
 </svg>
 <script>
 const urlParams = new URLSearchParams(window.location.search);
@@ -55,9 +52,11 @@ var r = parseInt(urlParams.get('r'));
 var inp=urlParams.get('inp');
  const getThemeColor = (name) => getComputedStyle(document.documentElement)
    .getPropertyValue(`--zatam-${name}`).trim();
- var colors = ["gold", "coral", "blue", "muted", "success", "border"].map(getThemeColor);
+ var colors = ["gold", "coral", "blue", "muted", "success"].map(getThemeColor);
  const correctStroke = getThemeColor("blue");
  const incorrectStroke = getThemeColor("coral");
+ const successFill = getThemeColor("success-soft");
+ const dangerSoftFill = getThemeColor("danger-soft");
  var set = urlParams.get('s');
  var found=wt=0;
 var gameStartedAt=null;
@@ -87,6 +86,8 @@ if (obj.innerHTML==val)
 {
 obj.onclick="";
 obj.setAttribute("stroke",correctStroke);
+const correctHexagon = obj.parentElement.querySelector("polygon");
+if (correctHexagon) correctHexagon.setAttribute("fill", successFill);
 found++;
 publishGameStats();
   document.getElementById("remain").innerHTML = " Still to find : "
@@ -103,6 +104,8 @@ for (var i=0;i<txtnods.length;i++){
 else 
 {
 obj.setAttribute("stroke",incorrectStroke);
+const incorrectHexagon = obj.parentElement.querySelector("polygon");
+if (incorrectHexagon) incorrectHexagon.setAttribute("fill", dangerSoftFill);
 wt++;
 publishGameStats();
 }
@@ -149,7 +152,7 @@ for (var i=0;i<txtnods.length;i++){
   if (txtnods[i].innerHTML == val)
      if (txtnods[i].getAttribute("stroke") != correctStroke)
 	 {
-	 	     txtnods[i].setAttribute("stroke","url(#linear)");
+             txtnods[i].setAttribute("stroke", getThemeColor("danger"));
 			 txtnods[i].setAttribute("stroke-width","2.5");
 		 }
 }
