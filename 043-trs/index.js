@@ -366,7 +366,7 @@ var playerid = url.searchParams.get("id");
 
             // Player canvas container.
             this.canvas = createCanvas(this.containerEl, this.dimensions.WIDTH,
-                this.dimensions.HEIGHT, Runner.classes.PLAYER);
+                this.dimensions.HEIGHT, Runner.classes.CANVAS);
 
             this.canvasCtx = this.canvas.getContext('2d');
             this.canvasCtx.fillStyle = '#f7f7f7';
@@ -385,10 +385,6 @@ var playerid = url.searchParams.get("id");
             this.tRex = new Trex(this.canvas, this.spriteDef.TREX);
 
             this.outerContainerEl.appendChild(this.containerEl);
-
-            if (IS_MOBILE) {
-                this.createTouchController();
-            }
 
             this.startListening();
             this.update();
@@ -429,10 +425,6 @@ var playerid = url.searchParams.get("id");
 
             this.dimensions.WIDTH = this.outerContainerEl.offsetWidth - padding * 2;
             this.dimensions.WIDTH = Math.min(DEFAULT_WIDTH, this.dimensions.WIDTH); //Arcade Mode
-            if (this.activated) {
-                this.setArcadeModeContainerScale();
-            }
-            
             // Redraw the elements back onto the canvas.
             if (this.canvas) {
                 this.canvas.width = this.dimensions.WIDTH;
@@ -505,7 +497,6 @@ var playerid = url.searchParams.get("id");
          * Update the game status to started.
          */
         startGame: function () {
-            this.setArcadeMode();
             this.runningTime = 0;
             this.playingIntro = false;
             this.tRex.playingIntro = false;
@@ -641,16 +632,47 @@ var playerid = url.searchParams.get("id");
             document.addEventListener(Runner.events.KEYDOWN, this);
             document.addEventListener(Runner.events.KEYUP, this);
 
-            if (IS_MOBILE) {
-                // Mobile only touch devices.
-                this.touchController.addEventListener(Runner.events.TOUCHSTART, this);
-                this.touchController.addEventListener(Runner.events.TOUCHEND, this);
-                this.containerEl.addEventListener(Runner.events.TOUCHSTART, this);
+            if (IS_TOUCH_ENABLED) {
+                // Listen across the full game panel, including the ground below the runner.
+                this.outerContainerEl.addEventListener(Runner.events.TOUCHSTART, this, { passive: false });
+                this.outerContainerEl.addEventListener(Runner.events.TOUCHEND, this, { passive: false });
             } else {
                 // Mouse.
                 document.addEventListener(Runner.events.MOUSEDOWN, this);
                 document.addEventListener(Runner.events.MOUSEUP, this);
             }
+
+            this.duckControl = document.getElementById('duckControl');
+            if (this.duckControl) {
+                this.handleDuckStart = this.startDuck.bind(this);
+                this.handleDuckEnd = this.endDuck.bind(this);
+                this.duckControl.addEventListener('pointerdown', this.handleDuckStart);
+                this.duckControl.addEventListener('pointerup', this.handleDuckEnd);
+                this.duckControl.addEventListener('pointercancel', this.handleDuckEnd);
+                this.duckControl.addEventListener('lostpointercapture', this.handleDuckEnd);
+            }
+        },
+
+        startDuck: function (e) {
+            e.preventDefault();
+            if (this.crashed) return;
+            if (!this.playing) {
+                this.loadSounds();
+                this.playing = true;
+                this.update();
+            }
+            if (this.tRex.jumping) {
+                this.tRex.setSpeedDrop();
+            } else {
+                this.tRex.setDuck(true);
+            }
+            if (this.duckControl.setPointerCapture && e.pointerId !== undefined) {
+                this.duckControl.setPointerCapture(e.pointerId);
+            }
+        },
+
+        endDuck: function () {
+            if (this.tRex && !this.tRex.jumping) this.tRex.setDuck(false);
         },
 
         /**
@@ -660,13 +682,18 @@ var playerid = url.searchParams.get("id");
             document.removeEventListener(Runner.events.KEYDOWN, this);
             document.removeEventListener(Runner.events.KEYUP, this);
 
-            if (IS_MOBILE) {
-                this.touchController.removeEventListener(Runner.events.TOUCHSTART, this);
-                this.touchController.removeEventListener(Runner.events.TOUCHEND, this);
-                this.containerEl.removeEventListener(Runner.events.TOUCHSTART, this);
+            if (IS_TOUCH_ENABLED) {
+                this.outerContainerEl.removeEventListener(Runner.events.TOUCHSTART, this);
+                this.outerContainerEl.removeEventListener(Runner.events.TOUCHEND, this);
             } else {
                 document.removeEventListener(Runner.events.MOUSEDOWN, this);
                 document.removeEventListener(Runner.events.MOUSEUP, this);
+            }
+            if (this.duckControl) {
+                this.duckControl.removeEventListener('pointerdown', this.handleDuckStart);
+                this.duckControl.removeEventListener('pointerup', this.handleDuckEnd);
+                this.duckControl.removeEventListener('pointercancel', this.handleDuckEnd);
+                this.duckControl.removeEventListener('lostpointercapture', this.handleDuckEnd);
             }
         },
 
@@ -675,14 +702,26 @@ var playerid = url.searchParams.get("id");
          * @param {Event} e
          */
         onKeyDown: function (e) {
-            // Prevent native page scrolling whilst tapping on mobile.
-            if (IS_MOBILE && this.playing) {
+            var isGameControlKey = Runner.keycodes.JUMP[e.keyCode] ||
+                Runner.keycodes.DUCK[e.keyCode];
+            var isEditableTarget = e.target && (e.target.isContentEditable ||
+                /INPUT|TEXTAREA|SELECT/.test(e.target.tagName));
+
+            // Space and arrow keys control the game and should never scroll the page.
+            if (isGameControlKey && !isEditableTarget) {
+                e.preventDefault();
+            }
+
+            // Touch events are registered non-passively so the page stays in place.
+            if (e.type === Runner.events.TOUCHSTART || e.type === Runner.events.TOUCHEND) {
                 e.preventDefault();
             }
 
             if (e.target != this.detailsButton) {
                 if (!this.crashed && (Runner.keycodes.JUMP[e.keyCode] ||
-                    e.type == Runner.events.TOUCHSTART)) {
+                    e.type == Runner.events.TOUCHSTART ||
+                    (e.type == Runner.events.MOUSEDOWN &&
+                        this.outerContainerEl.contains(e.target)))) {
                     if (!this.playing) {
                         this.loadSounds();
                         this.playing = true;
@@ -699,7 +738,7 @@ var playerid = url.searchParams.get("id");
                 }
 
                 if (this.crashed && e.type == Runner.events.TOUCHSTART &&
-                    e.currentTarget == this.containerEl) {
+                    e.currentTarget == this.outerContainerEl) {
                     this.restart();
                 }
             }
@@ -725,7 +764,7 @@ var playerid = url.searchParams.get("id");
             var keyCode = String(e.keyCode);
             var isjumpKey = Runner.keycodes.JUMP[keyCode] ||
                 e.type == Runner.events.TOUCHEND ||
-                e.type == Runner.events.MOUSEDOWN;
+                e.type == Runner.events.MOUSEUP;
 
             if (this.isRunning() && isjumpKey) {
                 this.tRex.endJump();
