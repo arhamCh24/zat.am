@@ -219,13 +219,13 @@
   .maze-controls { grid-row: 4; }
 
   .maze-direction-pad {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
   }
 }
 
 @media (max-width: 760px) {
   .maze-direction-pad {
-    grid-template-columns: minmax(0, 1fr);
+    flex-direction: column;
   }
 }
