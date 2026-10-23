@@ -159,6 +159,9 @@ body.zatam-minesweeper-game {
 
 .board-wrap {
   display: grid;
+  width: min(100%, 30rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
   overflow: hidden;
   padding: clamp(0.4rem, 2vw, 0.7rem);
   background: var(--mine-board);
@@ -168,16 +171,21 @@ body.zatam-minesweeper-game {
 }
 
 #grid {
-  width: min(100%, 30rem);
-  aspect-ratio: 1;
-  border-collapse: separate;
-  border-spacing: clamp(2px, 0.6vw, 4px);
-  table-layout: fixed;
+  --board-size: 10;
+  display: grid;
+  grid-template-columns: repeat(var(--board-size), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--board-size), minmax(0, 1fr));
+  gap: clamp(2px, 0.6vw, 4px);
+  width: 100%;
+  height: 100%;
   touch-action: manipulation;
 }
 
-#grid td {
-  width: 10%;
+#grid .mine-cell {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
   padding: 0;
   color: var(--zatam-heading);
   background: var(--mine-cell);
@@ -189,46 +197,47 @@ body.zatam-minesweeper-game {
   font-weight: 800;
   line-height: 1;
   text-align: center;
+  appearance: none;
   cursor: pointer;
   user-select: none;
   transition: background 0.16s ease, transform 0.16s ease;
 }
 
-#grid td:hover:not(.clicked):not(.marked) {
+#grid .mine-cell:hover:not(.clicked):not(.marked) {
   background: var(--mine-cell-hover);
   transform: translateY(-1px);
 }
 
-#grid td:focus-visible {
+#grid .mine-cell:focus-visible {
   outline: 3px solid var(--zatam-gold);
   outline-offset: 2px;
 }
 
-#grid td.clicked {
+#grid .mine-cell.clicked {
   color: var(--zatam-heading);
   background: var(--mine-cell-open);
   box-shadow: inset 0 0 0 1px rgb(11 43 79 / 9%);
   cursor: default;
 }
 
-#grid td[data-nearby="1"] { color: #2764c8; }
-#grid td[data-nearby="2"] { color: #21804b; }
-#grid td[data-nearby="3"] { color: #c2413b; }
-#grid td[data-nearby="4"] { color: #7142b5; }
+#grid .mine-cell[data-nearby="1"] { color: #2764c8; }
+#grid .mine-cell[data-nearby="2"] { color: #21804b; }
+#grid .mine-cell[data-nearby="3"] { color: #c2413b; }
+#grid .mine-cell[data-nearby="4"] { color: #7142b5; }
 
-#grid td.marked {
+#grid .mine-cell.marked {
   color: var(--zatam-white);
   background: var(--zatam-coral);
   box-shadow: inset 0 -2px 0 rgb(122 34 24 / 25%);
 }
 
-#grid td.mine {
+#grid .mine-cell.mine {
   color: var(--zatam-white);
   background: #c2413b;
   box-shadow: inset 0 -2px 0 rgb(122 34 24 / 25%);
 }
 
-#grid.is-finished td:not(.mine):not(.clicked) {
+#grid.is-finished .mine-cell:not(.mine):not(.clicked) {
   opacity: 0.7;
   cursor: default;
 }
@@ -312,11 +321,11 @@ body.zatam-minesweeper-game {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #grid td {
+  #grid .mine-cell {
     transition: none;
   }
 
-  #grid td:hover:not(.clicked):not(.marked) {
+  #grid .mine-cell:hover:not(.clicked):not(.marked) {
     transform: none;
   }
 }

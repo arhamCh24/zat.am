@@ -82,7 +82,7 @@
             </button>
           </div>
           <div class="board-wrap">
-            <table id="grid" aria-label="Minesweeper board"></table>
+            <div id="grid" role="group" aria-label="Minesweeper board"></div>
           </div>
           <p id="gameStatus" class="zatam-game-status zatam-game-status-info" role="status" aria-live="polite">
             Choose a square to begin.
@@ -143,6 +143,7 @@
       let markMode = false;
       let elapsedSeconds = 0;
       let timerId = null;
+      let cells = [];
 
       initGameScore({
         gameId: "008-mss",
@@ -251,21 +252,22 @@
         grid.innerHTML = "";
         grid.classList.remove("is-finished");
         grid.setAttribute("aria-disabled", "false");
+        grid.style.setProperty("--board-size", String(siz));
         markModeButton.disabled = false;
         resultPanel.classList.add("zatam-hidden");
         grid.setAttribute("aria-label", `${siz} by ${siz} Minesweeper board`);
         updateMarkModeButton();
 
+        cells = Array.from({ length: siz }, () => []);
         for (let rowIndex = 0; rowIndex < siz; rowIndex += 1) {
-          const row = grid.insertRow(rowIndex);
           for (let columnIndex = 0; columnIndex < siz; columnIndex += 1) {
-            const cell = row.insertCell(columnIndex);
+            const cell = document.createElement("button");
+            cell.type = "button";
+            cell.className = "mine-cell";
             cell.dataset.mine = "false";
             cell.dataset.marked = "false";
             cell.dataset.row = String(rowIndex + 1);
             cell.dataset.column = String(columnIndex + 1);
-            cell.tabIndex = 0;
-            cell.setAttribute("role", "button");
             cell.setAttribute("aria-disabled", "false");
             setCellLabel(cell, "Hidden square");
             cell.addEventListener("pointerdown", (event) => {
@@ -293,6 +295,8 @@
                 markCell(cell);
               }
             });
+            cells[rowIndex][columnIndex] = cell;
+            grid.append(cell);
           }
         }
 
@@ -305,7 +309,7 @@
         while (addedMines < mineTotal) {
           const row = Math.floor(Math.random() * siz);
           const column = Math.floor(Math.random() * siz);
-          const cell = grid.rows[row].cells[column];
+          const cell = cells[row][column];
           if (cell === firstCell || cell.dataset.mine === "true") continue;
           cell.dataset.mine = "true";
           addedMines += 1;
@@ -315,7 +319,7 @@
       function revealMines() {
         for (let row = 0; row < siz; row += 1) {
           for (let column = 0; column < siz; column += 1) {
-            const cell = grid.rows[row].cells[column];
+            const cell = cells[row][column];
             if (cell.dataset.mine === "true") {
               cell.classList.add("mine");
               cell.textContent = "✹";
@@ -330,8 +334,8 @@
         stopTimer();
         grid.classList.add("is-finished");
         grid.setAttribute("aria-disabled", "true");
-        grid.querySelectorAll("td").forEach((cell) => {
-          cell.tabIndex = -1;
+        grid.querySelectorAll(".mine-cell").forEach((cell) => {
+          cell.disabled = true;
           cell.setAttribute("aria-disabled", "true");
         });
         markModeButton.disabled = true;
@@ -423,12 +427,12 @@
         safeCleared += 1;
 
         let nearbyMines = 0;
-        const cellRow = cell.parentNode.rowIndex;
-        const cellColumn = cell.cellIndex;
+        const cellRow = Number(cell.dataset.row) - 1;
+        const cellColumn = Number(cell.dataset.column) - 1;
 
         for (let row = Math.max(cellRow - 1, 0); row <= Math.min(cellRow + 1, siz - 1); row += 1) {
           for (let column = Math.max(cellColumn - 1, 0); column <= Math.min(cellColumn + 1, siz - 1); column += 1) {
-            if (grid.rows[row].cells[column].dataset.mine === "true") nearbyMines += 1;
+            if (cells[row][column].dataset.mine === "true") nearbyMines += 1;
           }
         }
 
@@ -437,7 +441,7 @@
           setCellLabel(cell, "Revealed safe square, no adjacent mines");
           for (let row = Math.max(cellRow - 1, 0); row <= Math.min(cellRow + 1, siz - 1); row += 1) {
             for (let column = Math.max(cellColumn - 1, 0); column <= Math.min(cellColumn + 1, siz - 1); column += 1) {
-              const neighbor = grid.rows[row].cells[column];
+              const neighbor = cells[row][column];
               if (!neighbor.classList.contains("clicked") && neighbor.dataset.marked !== "true") clickCell(neighbor);
             }
           }
