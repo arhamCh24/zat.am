@@ -36,19 +36,19 @@
 
       <section class="zatam-game-stats minesweeper-stats" aria-label="Game progress">
         <div class="zatam-game-stat zatam-game-score">
-          <span class="zatam-game-stat-label">Safe squares</span>
-          <span class="zatam-game-stat-value"><span id="safeCount">०</span> / <span id="safeTotal">०</span></span>
-          <progress id="mss" value="0" max="80" aria-label="Safe squares cleared">0%</progress>
-        </div>
-        <div class="zatam-game-stat">
-          <span class="zatam-game-stat-label">Mine markers</span>
-          <span class="zatam-game-stat-value"><span id="markerCount">०</span> / <span id="markerTotal">०</span></span>
-          <span class="minesweeper-stat-note">right-click or Mark mode</span>
+          <span class="zatam-game-stat-label">Score</span>
+          <span id="scoreValue" class="zatam-game-stat-value">100</span>
+          <span class="minesweeper-stat-note">final score on a win</span>
         </div>
         <div class="zatam-game-stat">
           <span class="zatam-game-stat-label">Board</span>
           <span id="boardSize" class="zatam-game-stat-value">१० × १०</span>
           <span class="minesweeper-stat-note">choose a size below</span>
+        </div>
+        <div class="zatam-game-stat">
+          <span class="zatam-game-stat-label">Time</span>
+          <span id="timerValue" class="zatam-game-stat-value">०:००</span>
+          <span class="minesweeper-stat-note">starts on first reveal</span>
         </div>
       </section>
 
@@ -57,6 +57,9 @@
           <h2 class="zatam-game-section-title">कठिनता</h2>
           <p class="control-copy">Choose the size of the field.</p>
           <div class="size-options" role="group" aria-label="Choose board size">
+            <button class="zatam-game-btn zatam-game-btn-secondary size-button" type="button" data-size="5" aria-pressed="false">
+              लघु <span>५ × ५</span>
+            </button>
             <button class="zatam-game-btn zatam-game-btn-secondary size-button" type="button" data-size="7" aria-pressed="false">
               सरलम् <span>७ × ७</span>
             </button>
@@ -84,7 +87,6 @@
           <p id="gameStatus" class="zatam-game-status zatam-game-status-info" role="status" aria-live="polite">
             Choose a square to begin.
           </p>
-          <progress id="gm" value="0" max="20" hidden>0%</progress>
         </section>
       </section>
 
@@ -95,26 +97,43 @@
         </button>
       </nav>
 
+      <section id="resultPanel" class="zatam-game-result zatam-hidden" aria-live="polite">
+        <h2 class="zatam-game-result-title">जयः 🎉</h2>
+        <div id="resultScore" class="zatam-game-result-score">100 / 100</div>
+        <p id="resultDetails" class="zatam-game-result-message"></p>
+        <p id="scoreSaveStatus" class="zatam-game-status zatam-game-status-info">
+          Checking leaderboard...
+        </p>
+      </section>
+
       <footer class="game-footer">
         Based on the Minesweeper game by <a href="https://www.101computing.net/minesweeper-in-javascript/" rel="noreferrer">101 Computing</a>.
       </footer>
     </main>
 
-    <script>
+    <script type="module">
+      import {
+        clampScore,
+        initGameScore,
+        resetGameScore,
+        submitGameScore,
+      } from "../js/game-score.js";
+
       const grid = document.getElementById("grid");
-      const progress = document.getElementById("mss");
-      const markerProgress = document.getElementById("gm");
-      const safeCount = document.getElementById("safeCount");
-      const safeTotal = document.getElementById("safeTotal");
-      const markerCount = document.getElementById("markerCount");
-      const markerTotal = document.getElementById("markerTotal");
+      const scoreValue = document.getElementById("scoreValue");
       const boardSize = document.getElementById("boardSize");
       const gameStatus = document.getElementById("gameStatus");
       const markModeButton = document.getElementById("markModeButton");
       const sizeButtons = [...document.querySelectorAll(".size-button")];
+      const timerValue = document.getElementById("timerValue");
+      const resultPanel = document.getElementById("resultPanel");
+      const resultScore = document.getElementById("resultScore");
+      const resultDetails = document.getElementById("resultDetails");
+      const scoreSaveStatus = document.getElementById("scoreSaveStatus");
 
       const urlParams = new URLSearchParams(window.location.search);
-      let siz = Number(urlParams.get("s")) === 7 ? 7 : 10;
+      const requestedSize = Number(urlParams.get("s"));
+      let siz = [5, 7, 10].includes(requestedSize) ? requestedSize : 10;
       let mineTotal = 0;
       let safeTotalCount = 0;
       let safeCleared = 0;
@@ -122,6 +141,13 @@
       let gameActive = true;
       let hasStarted = false;
       let markMode = false;
+      let elapsedSeconds = 0;
+      let timerId = null;
+
+      initGameScore({
+        gameId: "008-mss",
+        gameName: "संस्कृतम् Minesweeper",
+      });
 
       function devanagari(value) {
         return Sanscript.t(String(value), "iast", "devanagari");
@@ -132,16 +158,48 @@
         gameStatus.className = `zatam-game-status zatam-game-status-${kind}`;
       }
 
+      function formatTime(totalSeconds) {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = String(totalSeconds % 60).padStart(2, "0");
+        return `${devanagari(minutes)}:${devanagari(seconds)}`;
+      }
+
+      function calculateScore() {
+        const paceBySize = {
+          5: { parSeconds: 30, secondsPerPoint: 2 },
+          7: { parSeconds: 60, secondsPerPoint: 3 },
+          10: { parSeconds: 150, secondsPerPoint: 6 },
+        };
+        const pace = paceBySize[siz];
+        const overtime = Math.max(0, elapsedSeconds - pace.parSeconds);
+        return clampScore(100 - Math.floor(overtime / pace.secondsPerPoint));
+      }
+
+      function updateTimer() {
+        timerValue.textContent = formatTime(elapsedSeconds);
+      }
+
+      function startTimer() {
+        if (timerId || !gameActive) return;
+        // Keep the shared leaderboard timer aligned with the visible game timer:
+        // both begin only once a player reveals their first square.
+        resetGameScore();
+        timerId = window.setInterval(() => {
+          elapsedSeconds += 1;
+          updateStats();
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (!timerId) return;
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+
       function updateStats() {
-        progress.value = safeCleared;
-        progress.max = safeTotalCount;
-        markerProgress.value = markers;
-        markerProgress.max = mineTotal;
-        safeCount.textContent = devanagari(safeCleared);
-        safeTotal.textContent = devanagari(safeTotalCount);
-        markerCount.textContent = devanagari(markers);
-        markerTotal.textContent = devanagari(mineTotal);
         boardSize.textContent = `${devanagari(siz)} × ${devanagari(siz)}`;
+        scoreValue.textContent = String(calculateScore());
+        updateTimer();
       }
 
       function setCellLabel(cell, description) {
@@ -157,6 +215,7 @@
       }
 
       function setMarkMode(nextMode) {
+        if (!gameActive) return;
         markMode = nextMode;
         updateMarkModeButton();
         setStatus(
@@ -180,6 +239,7 @@
       }
 
       function generateGrid() {
+        stopTimer();
         mineTotal = Math.floor((siz * siz) / 5);
         safeTotalCount = siz * siz - mineTotal;
         safeCleared = 0;
@@ -187,9 +247,12 @@
         gameActive = true;
         hasStarted = false;
         markMode = false;
+        elapsedSeconds = 0;
         grid.innerHTML = "";
         grid.classList.remove("is-finished");
         grid.setAttribute("aria-disabled", "false");
+        markModeButton.disabled = false;
+        resultPanel.classList.add("zatam-hidden");
         grid.setAttribute("aria-label", `${siz} by ${siz} Minesweeper board`);
         updateMarkModeButton();
 
@@ -264,19 +327,65 @@
 
       function finishGame(message, kind) {
         gameActive = false;
+        stopTimer();
         grid.classList.add("is-finished");
         grid.setAttribute("aria-disabled", "true");
         grid.querySelectorAll("td").forEach((cell) => {
           cell.tabIndex = -1;
           cell.setAttribute("aria-disabled", "true");
         });
+        markModeButton.disabled = true;
         setStatus(message, kind);
+      }
+
+      function showResult(finalScore) {
+        resultScore.textContent = `${finalScore} / 100`;
+        resultDetails.textContent = `You cleared all ${safeTotalCount} safe squares on the ${siz} × ${siz} board in ${formatTime(elapsedSeconds)}.`;
+        scoreSaveStatus.className = "zatam-game-status zatam-game-status-info";
+        scoreSaveStatus.textContent = "Saving your score...";
+        resultPanel.classList.remove("zatam-hidden");
+        resultPanel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      async function saveCompletedScore(finalScore) {
+        try {
+          const result = await submitGameScore(finalScore, {
+            metrics: {
+              boardSize: siz,
+              mines: mineTotal,
+              safeSquares: safeTotalCount,
+              gameTimerSeconds: elapsedSeconds,
+            },
+          });
+
+          if (result.ok) {
+            scoreSaveStatus.className = "zatam-game-status zatam-game-status-success";
+            scoreSaveStatus.textContent = "Score saved to the leaderboard ✓";
+          } else if (result.reason === "not-signed-in") {
+            scoreSaveStatus.className = "zatam-game-status zatam-game-status-info";
+            scoreSaveStatus.textContent = "Game complete! Sign in to save future scores to the leaderboard.";
+          } else if (result.reason === "already-submitted") {
+            scoreSaveStatus.className = "zatam-game-status zatam-game-status-success";
+            scoreSaveStatus.textContent = "Score already saved ✓";
+          } else {
+            scoreSaveStatus.className = "zatam-game-status zatam-game-status-error";
+            scoreSaveStatus.textContent = "Game complete, but the score could not be saved.";
+          }
+        } catch (error) {
+          console.error("[008-mss] Score submission failed:", error);
+          scoreSaveStatus.className = "zatam-game-status zatam-game-status-error";
+          scoreSaveStatus.textContent = "Game complete, but the leaderboard score could not be saved.";
+        }
       }
 
       function checkLevelCompletion() {
         if (safeCleared === safeTotalCount) {
           revealMines();
           finishGame("जयः 🙂 All safe squares are clear. Start a new board when you are ready.", "success");
+          const finalScore = calculateScore();
+          scoreValue.textContent = String(finalScore);
+          showResult(finalScore);
+          void saveCompletedScore(finalScore);
         }
       }
 
@@ -301,6 +410,7 @@
         if (!hasStarted) {
           addMines(cell);
           hasStarted = true;
+          startTimer();
         }
 
         if (cell.dataset.mine === "true") {

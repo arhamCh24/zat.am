@@ -40,31 +40,6 @@ body.zatam-minesweeper-game {
   place-items: center;
 }
 
-.minesweeper-stats progress {
-  width: min(100%, 11rem);
-  height: 0.45rem;
-  margin-top: 0.65rem;
-  overflow: hidden;
-  border: 0;
-  border-radius: 999px;
-  background: #e4ebf4;
-}
-
-.minesweeper-stats progress::-webkit-progress-bar {
-  background: #e4ebf4;
-  border-radius: 999px;
-}
-
-.minesweeper-stats progress::-webkit-progress-value {
-  background: var(--zatam-blue);
-  border-radius: 999px;
-}
-
-.minesweeper-stats progress::-moz-progress-bar {
-  background: var(--zatam-blue);
-  border-radius: 999px;
-}
-
 .minesweeper-stat-note {
   display: block;
   margin-top: 0.55rem;
