@@ -10,8 +10,8 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const defaultRows = 2;
-const defaultCols = 2;
+const defaultRows = 3;
+const defaultCols = 3;
 const defaultMinDigit = 0;
 const defaultMaxDigit = 1;
 const defaultMoveType = true;
@@ -415,10 +415,10 @@ function calculateScore(elapsedSeconds, totalMoves) {
     return 0;
   }
 
-  // Start at 100, decrease by 10 every minute
+  // Starts with100, goes down by 10 every minute
   const baseScore = 100 - minuteBracket * 10;
 
-  // Start with 30 moves, increase limit by 20 every minute
+  // Start with 30 moves, goes up by 20 every minute
   const moveLimit = 30 + minuteBracket * 20;
 
   // Deduct 5 points if the player exceeds the move limit
