@@ -42,9 +42,16 @@ async function fetchPanchang(dateInput, callback) {
         }
       
     } catch (error) {
-      
-        console.error("Error fetching Panchang:", error);
-    } finally {
+    console.error("Error fetching Panchang:", error);
+
+    document.getElementById("nakshatra").textContent =
+        "Unable to load Panchang data.";
+
+    document.getElementById("raashi").textContent =
+        "Please check the browser console.";
+
+    document.getElementById("maasa").textContent = "";
+	} finally {
         hideLoadingPopup(); // Always hide popup after fetch
     }
 }
