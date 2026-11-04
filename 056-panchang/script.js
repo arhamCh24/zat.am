@@ -233,6 +233,12 @@ function updateClockTime () {
 // end of clock management code
 
 function resetBtnAction() {
+	panchangCompleted = false;
+	panchangUsedSolution = false;
+	panchangFinalScore = 0;
+
+	closePanchangCompletion();
+	window.panchangLeaderboard?.reset();
 	var pcs;
 	const mySvg = document.getElementById("puzzle");
 	const side = document.getElementById("usedSide");
@@ -444,10 +450,20 @@ function updatePcbcolor() {
 }
 
 function dateChanged(date){
+	panchangCompleted = false;
+	panchangUsedSolution = false;
+	panchangFinalScore = 0;
+
+	closePanchangCompletion();
+	window.panchangLeaderboard?.reset();
+
 	let newDate = new Date(date);
-  let validDate = newDate.toISOString().split('T')[0];
+  	let validDate = newDate.toISOString().split('T')[0];
 	// updSquaresPos(newDate);
-  fetchPanchang(validDate, updSquaresPos);
+	fetchPanchang(validDate, () => {
+			updSquaresPos();
+			resetBtnAction();
+	});
 }
 
 function updSquaresPos(){
@@ -875,9 +891,10 @@ function shareBoard(evt) {
 }
 
 function showSolution() {
-	if( solution ) {
-		placePieces(solution);
-	}
+    if (solution) {
+        panchangUsedSolution = true;
+        placePieces(solution);
+    }
 }
 
 var chkLabel = document.getElementById("chkrep");
@@ -907,8 +924,8 @@ function updateSolutionMessage(msg,displaySolBtn = true) {
 	}
 }
 
-chkBtn = document.getElementById("check");
-chkBtn.style.display = 'none';
+const chkBtn = document.getElementById("check");
+chkBtn.style.display = "block";
 
 function startChkBtnAnimation() {
 	// unicode char 003C is less than character starting html tags
@@ -922,114 +939,296 @@ function stopChkBtnAnimation() {
 	chkBtn.innerHTML = checkButtonCaption;
 }
 
-// Function call upon response from server about the request sent by checkSol
-function httpRequestEnded() {
-	if ( isHttpReqForEnd == false ) {
-		// Stop check button animation
-		stopChkBtnAnimation();
-	}
+let panchangCompleted = false;
+let panchangUsedSolution = false;
+let panchangFinalScore = 0;
 
-	// count the number of placed pcs in returned hex string
-	var nbPcsPlaced = nbPcs;
-	requestResponse = xmlHttpReq.responseText;
-	if ( hexPcsPos.match(/ff/g) ) {
-		nbPcsPlaced = pcsList.length -  (hexPcsPos.match(/ff/g)).length;
-	}
+// Returns the cells occupied by the polygon's actual
+// position, rotation, and reflection in the SVG.
+function getOccupiedCells(piece) {
+    const matrix = piece.transform.baseVal.consolidate()?.matrix;
 
-	//console.log("http request with PcsPos=" + hexPcsPos  + " date: " + httpReqDate + " side: " + httpReqSide + " get response : " + requestResponse);
+    if (!matrix) {
+        throw new Error("Cannot read SVG piece transformation.");
+    }
 
-	// null is not more a possible answer from the server since it has been updated
-	if ( requestResponse == "null" ){
-		if ( isHttpReqForEnd == false ) {
-			updateSolutionMessage(labelTextNoSol);
-			solution = null;
-		}
-	} else {
+    const inverse = matrix.inverse();
+    const cells = [];
 
-		var solutionExist = false;
-		if ( hexPcsPos == requestResponse) {
-			// the puzzle has been solved!
-			var prettyDate = new Date(httpReqDate).toDateString()
-			updateSolutionMessage(labelSolFound + " for " + prettyDate  +  " using " + httpReqSide + " sides",false);
-			solutionExist = true;
-			pauseClock();
-		} else {
-			if ( isHttpReqForEnd == false ) {
-			// check if all placed pieces are correctly placed
-			var sideByteResp = Number( "0x" + requestResponse.substring( hexPcsPosLen-2, hexPcsPosLen ) );
-			var sideBytePcs = Number( "0x" + hexPcsPos.substring( hexPcsPosLen-2, hexPcsPosLen ) );
-			var nbPcsCorrect = 0;
-			for ( var pcsIdx=0; pcsIdx < nbPcs; pcsIdx++ ) {
-				if( hexPcsPos.substring(2*pcsIdx, (2*pcsIdx)+2)  != "ff" ) {
-					pcs = mySvg.getElementById(pcsList[pcsIdx]);
-					if ( ( requestResponse.substring(2*pcsIdx, (2*pcsIdx)+2) == hexPcsPos.substring(2*pcsIdx, (2*pcsIdx)+2) ) && ( (Math.trunc(sideByteResp / (2**pcsIdx)) % 2 ) == (Math.trunc(sideBytePcs / (2**pcsIdx)) % 2) ) ) {
-						pcs.style.fill = labelColorSol;
-						nbPcsCorrect++;
-					} else {
-						pcs.style.fill = labelColorNoSol;
-					}
-				}
-			}
-			if ( nbPcsCorrect == nbPcsPlaced ) {
-				solutionExist = true;
-			}
-			if ( solutionExist == true ) {
-				updateSolutionMessage(labelTextSol);
-			} else {
-				updateSolutionMessage(labelTextNoSol);
-				solution = null;
-			}
-			}
-		}
-		solution = requestResponse;
-	}
-	isHttpReqForEnd = false;
+    for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 7; col++) {
+            const cx = 100 + col * 100 + 50;
+            const cy = 100 + row * 100 + 50;
+
+            const point = mySvg.createSVGPoint();
+            point.x = cx;
+            point.y = cy;
+
+            const localPoint = point.matrixTransform(inverse);
+
+            if (piece.isPointInFill(localPoint)) {
+                cells.push(`${col},${row}`);
+            }
+        }
+    }
+
+    return cells;
 }
 
-function checkIfPuzzleSolved() {
-	var nbPlacedPcs=0;
-	var pcs;
-	for (var i = 0; i < pcsList.length; i++) {
-		pcs = mySvg.getElementById(pcsList[i]);
-		if( getPcsProp(pcs.id,"placed") == true ) {
-			nbPlacedPcs +=1;
+// Calculate the area of a polygon in grid cells.
+// This also prevents accepting pieces extending
+// beyond the puzzle boundary.
+function getPieceArea(piece) {
+	const points = piece.points;
+	let area = 0;
+
+	for (let i = 0; i < points.numberOfItems; i++) {
+		const a = points.getItem(i);
+		const b = points.getItem((i + 1) % points.numberOfItems);
+
+		area += a.x * b.y - b.x * a.y;
+	}
+
+	return Math.abs(area) / 2 / 10000;
+}
+
+function validatePanchangPuzzle() {
+	if (
+		!panchang_data ||
+		!Number.isFinite(Number(panchang_data.raashi_num)) ||
+		!Number.isFinite(Number(panchang_data.nakshatra_num)) ||
+		!Number.isFinite(Number(panchang_data.maasa_num))
+	) {
+		return {
+			solved: false,
+			message: "Panchang date data has not loaded."
+		};
+	}
+
+	const required = new Set();
+
+	// Main board: 6 columns by 8 rows.
+	for (let row = 0; row < 8; row++) {
+		for (let col = 0; col < 6; col++) {
+			required.add(`${col},${row}`);
 		}
 	}
-	if ( nbPlacedPcs == nbPcs ) {
-		isHttpReqForEnd = true;
-		checkSol();
+
+	// Three additional cells on the right.
+	for (let row = 2; row <= 4; row++) {
+		required.add(`6,${row}`);
 	}
+
+	// Gray squares are the cells that must stay empty.
+	const grayIds = [
+		"monthSquare",
+		"daySquare",
+		"weekdaySquare"
+	];
+
+	const grayCells = new Set();
+
+	for (const id of grayIds) {
+		const rect = document.getElementById(id);
+
+		const col = Math.round(
+			(Number(rect.getAttribute("x")) - 100) / 100
+		);
+
+		const row = Math.round(
+			(Number(rect.getAttribute("y")) - 100) / 100
+		);
+
+		const key = `${col},${row}`;
+
+		if (!required.has(key) || grayCells.has(key)) {
+			return {
+				solved: false,
+				message: "Invalid Panchang target squares."
+			};
+		}
+
+		grayCells.add(key);
+		required.delete(key);
+	}
+
+	const occupied = new Set();
+
+	for (const id of pcsList) {
+		const piece = mySvg.getElementById(id);
+
+		if (!piece || getPcsProp(id, "placed") !== true) {
+			return {
+				solved: false,
+				message: "Place all 10 pieces on the board."
+			};
+		}
+
+		const cells = getOccupiedCells(piece);
+		const expectedArea = getPieceArea(piece);
+
+		if (cells.length !== expectedArea) {
+			return {
+				solved: false,
+				message: "A piece is outside the board or not aligned."
+			};
+		}
+
+		for (const cell of cells) {
+			if (!required.has(cell)) {
+				return {
+					solved: false,
+					message: grayCells.has(cell)
+						? "A gray square is covered."
+						: "A piece extends outside the puzzle or overlaps another."
+				};
+			}
+
+			if (occupied.has(cell)) {
+				return {
+					solved: false,
+					message: "Two puzzle pieces overlap."
+				};
+			}
+
+			occupied.add(cell);
+		}
+	}
+
+	if (occupied.size !== required.size) {
+		return {
+			solved: false,
+			message: `${required.size - occupied.size} cells remain uncovered.`
+		};
+	}
+
+	return {
+		solved: true,
+		message: "Puzzle solved!"
+	};
 }
 
 function checkSol() {
-	var dateInput = document.getElementById("dateToSolve");
-	var sideSelect = document.getElementById("usedSide");
-	var date = dateInput.value;
-	var side = sideSelect.value;
-	httpReqDate = date;
-	httpReqSide = side;
-	hexPcsPos = "";
+	if (panchangCompleted) return;
 
-	if ( httpReqSide == "frosted" ) {
-		turnPcs(false);
-	}
-	if ( httpReqSide == "smooth" ) {
-		turnPcs(true);
-	}
+	try {
+		const result = validatePanchangPuzzle();
 
-	hexPcsPos = getHexPcsPos();
+		if (!result.solved) {
+			updateSolutionMessage(result.message, false);
+			return;
+		}
 
-	var requestResponse = null;
-	// manage the protocol because http request are blocked on https pages and vice-versa
-	var theUrl = location.protocol + solutionsServerURI + "?date=" + httpReqDate + "&side=" + httpReqSide + "&pcspos=" + hexPcsPos + "&action=check";
-	xmlHttpReq.open( "GET", theUrl, true); // false for synchronous request
-	xmlHttpReq.onload = httpRequestEnded;
-	// xmlHttpReq.send( null );
-	if ( isHttpReqForEnd == false ) {
-		// start animation of "check" button to show that the request has been taken into account
-		// startChkBtnAnimation();
+		pauseClock();
+		panchangCompleted = true;
+
+		const elapsedSeconds =
+			clockHours * 3600 +
+			clockMinutes * 60 +
+			clockSeconds;
+
+		// 100 points initially; lose 1 every 15 seconds.
+		panchangFinalScore = Math.max(
+			0,
+			100 - Math.floor(elapsedSeconds / 15)
+		);
+
+		updateSolutionMessage("Puzzle solved!", false);
+		showPanchangCompletion(elapsedSeconds, panchangFinalScore);
+
+	} catch (error) {
+		console.error("Puzzle validation error:", error);
+		updateSolutionMessage(
+			"Unable to check puzzle. See browser console.",
+			false
+		);
 	}
 }
+
+
+function showPanchangCompletion(seconds, score) {
+    const popup = document.getElementById("panchangCompletion");
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    document.getElementById("panchangFinalTime").textContent =
+        `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+
+    document.getElementById("panchangFinalScore").textContent =
+        `${score}/100`;
+
+    const submitButton =
+        document.getElementById("panchangSubmitScore");
+
+    submitButton.disabled = panchangUsedSolution;
+    submitButton.textContent = panchangUsedSolution
+        ? "Score ineligible (solution used)"
+        : "Submit Score";
+
+    document.getElementById("panchangSubmitStatus").textContent = "";
+    popup.style.display = "flex";
+}
+
+function closePanchangCompletion() {
+    document.getElementById("panchangCompletion").style.display = "none";
+}
+
+function restartPanchangPuzzle() {
+    closePanchangCompletion();
+    resetBtnAction();
+}
+
+async function submitPanchangScore() {
+    const status = document.getElementById("panchangSubmitStatus");
+    const button = document.getElementById("panchangSubmitScore");
+
+    if (!panchangCompleted || panchangUsedSolution) return;
+
+    if (!window.panchangLeaderboard) {
+        status.textContent = "Leaderboard is not available.";
+        return;
+    }
+
+    button.disabled = true;
+    status.textContent = "Submitting score...";
+
+    try {
+        const seconds =
+            clockHours * 3600 +
+            clockMinutes * 60 +
+            clockSeconds;
+
+        const result = await window.panchangLeaderboard.submit(
+            panchangFinalScore,
+            {
+                result: "completed",
+                metrics: {
+                    elapsedSeconds: seconds,
+                    puzzleDate:
+                        document.getElementById("dateToSolve").value
+                }
+            }
+        );
+
+        if (result?.ok) {
+            status.textContent = "Score submitted successfully!";
+        } else if (result?.reason === "not-signed-in") {
+            status.textContent =
+                "Log in to Zat.am, then try submitting again.";
+            button.disabled = false;
+        } else {
+            status.textContent =
+                `Submission unavailable: ${result?.reason || "unknown error"}`;
+            button.disabled = false;
+        }
+    } catch (error) {
+        console.error("Score submission error:", error);
+        status.textContent = "Could not submit score.";
+        button.disabled = false;
+    }
+}
+
 
 function roundToGrid(value) {
 	var rounded;
@@ -1156,7 +1355,6 @@ function computePcsPos(pcs) {
 			setPcsProp(pcs.id,"y",y);
 			setPcsProp(pcs.id,"placed",true);
 			pcs.style.stroke = "white";
-			checkIfPuzzleSolved();
 		} else {
 			setPcsProp(pcs.id,"x",null);
 			setPcsProp(pcs.id,"y",null);

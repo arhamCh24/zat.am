@@ -267,6 +267,41 @@
           </div>
       </div>
 
+      
+    <div id="panchangCompletion" class="panchang-completion">
+        <div class="panchang-completion-card">
+            <h2>Puzzle Completed!</h2>
+            <p>You successfully solved the Panchang puzzle.</p>
+
+            <div class="panchang-result">
+                <span>Completion Time</span>
+                <strong id="panchangFinalTime">0:00</strong>
+            </div>
+
+            <div class="panchang-result">
+                <span>Final Score</span>
+                <strong id="panchangFinalScore">0/100</strong>
+            </div>
+
+            <button
+                id="panchangSubmitScore"
+                onclick="submitPanchangScore()">
+                Submit Score
+            </button>
+
+            <p id="panchangSubmitStatus" aria-live="polite"></p>
+
+            <button onclick="restartPanchangPuzzle()">
+                Play Again
+            </button>
+
+            <button onclick="closePanchangCompletion()">
+                Close
+            </button>
+        </div>
+    </div>
+
+
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function() {
@@ -296,6 +331,26 @@
       type="module"
       src="../js/navbar-loader.js"
     ></script>
+
+    
+    <script type="module">
+        import {
+            initGameScore,
+            submitGameScore,
+            resetGameScore
+        } from "../js/game-score.js";
+
+        initGameScore({
+            gameId: "056-panchang",
+            gameName: "Panchang Puzzle"
+        });
+
+        window.panchangLeaderboard = {
+            submit: submitGameScore,
+            reset: resetGameScore
+        };
+    </script>
+
 </body>
   <footer>
     <span style="white-space: nowrap"> &copy; 2025 <a href="https://www.pradeepd.com/hobbies/apps">Pradeep D</a>, <a href="https://www.iseek.page">iSeek</a>. Courtesy: Oliverrt </span>

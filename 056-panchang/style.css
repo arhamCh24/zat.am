@@ -461,3 +461,72 @@
 footer{
   text-align: center;
 }
+
+
+/* Panchang completion popup */
+
+.panchang-completion {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.panchang-completion-card {
+    background: white;
+    color: #222;
+    border-radius: 18px;
+    padding: 30px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.panchang-completion-card h2 {
+    color: #2f5d8c;
+    margin-top: 0;
+}
+
+.panchang-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.panchang-result strong {
+    font-size: 1.4rem;
+}
+
+.panchang-completion-card button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.panchang-completion-card button:hover {
+    background: #287eb5;
+}
+
+.panchang-completion-card button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#panchangSubmitStatus {
+    font-size: 14px;
+    min-height: 20px;
+}
