@@ -26,6 +26,14 @@
     <button type="button" class="button" id="start">
       Start Game <i class="rocket"></i>
     </button>
+    
+  <div id="game-stats" class="game-stats" aria-live="off">
+    <div>Time: <strong id="timer">0.0s</strong></div>
+    <div>Speed: <strong id="wpm">0 WPM</strong></div>
+    <div>Accuracy: <strong id="accuracy">100%</strong></div>
+    <div>Score: <strong id="score">0</strong></div>
+  </div>
+
     <p id="reference"></p>
     <p id="quote"></p>
     <p id="message"></p>
@@ -58,6 +66,38 @@
         })
       }
     </script>
+
+    
+<section id="leaderboard" class="leaderboard">
+  <h2>🏆 Bhagavad Gita Leaderboard</h2>
+  <p id="personal-best">Personal Best: 0</p>
+
+  <div id="submit-score" hidden>
+    <label for="player-name">Your name</label>
+    <input id="player-name" maxlength="24"
+           placeholder="Enter your name">
+    <button type="button" id="save-score">
+      Submit Score
+    </button>
+    <p id="save-status" role="status"></p>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Player</th>
+        <th>Score</th>
+        <th>WPM</th>
+        <th>Accuracy</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <tr><td colspan="5">Loading...</td></tr>
+    </tbody>
+  </table>
+</section>
+
   <footer>
     <span style="white-space: nowrap"> &copy; 2023 <a href="https://www.pradeepd.com/hobbies/apps">Pradeep D</a>, <a href="https://www.iseek.page">iSeek</a>. Ref: T.N. Sethumadhavan, 2010, "Srimad Bhagavad Gita", esamskriti.com </span>
  </footer>

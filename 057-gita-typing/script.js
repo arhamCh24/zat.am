@@ -118,11 +118,88 @@ let num_errors, progression_type, nectar_index=-1, is_random;
 
 let lastPlayedTs;
 
+let timerInterval = null;
+let gameStartTime = 0;
+let mistakeCount = 0;
+let previousTypedValue = "";
+let latestResult = null;
+
+const timerDisplay = document.getElementById("timer");
+const wpmDisplay = document.getElementById("wpm");
+const accuracyDisplay = document.getElementById("accuracy");
+const scoreDisplay = document.getElementById("score");
+
+function calculateStats(seconds) {
+  const safeSeconds = Math.max(seconds, 0.1);
+  const characters = quoteText ? quoteText.length : 0;
+
+  const wpm = Math.round(
+    (characters / 5 / safeSeconds) * 60
+  );
+
+  const accuracy = Math.max(
+    0,
+    Math.round(
+      (characters / (characters + mistakeCount || 1)) * 100
+    )
+  );
+
+  const score = Math.min(
+    1000,
+    Math.round(wpm * 10 * (accuracy / 100))
+  );
+
+  return { wpm, accuracy, score };
+}
+
+function updateStats() {
+  if (!is_playing) return;
+
+  const seconds = (performance.now() - gameStartTime) / 1000;
+
+  timerDisplay.textContent = seconds.toFixed(1) + "s";
+
+  // Live speed based on correctly completed words.
+  const completedCharacters =
+    quoteText.length -
+    wordQueue.join(" ").length;
+
+  const liveWpm = Math.max(
+    0,
+    Math.round(
+      (completedCharacters / 5 / Math.max(seconds, 0.1)) * 60
+    )
+  );
+
+  wpmDisplay.textContent = liveWpm + " WPM";
+
+  const stats = calculateStats(seconds);
+  accuracyDisplay.textContent = stats.accuracy + "%";
+  scoreDisplay.textContent = stats.score;
+}
+
+
 function startGame() {
 
   console.log("new game started!");
   is_playing = true;
   num_errors = 0;
+
+  clearInterval(timerInterval);
+
+  mistakeCount = 0;
+  previousTypedValue = "";
+  latestResult = null;
+
+  input.value = "";
+  input.className = "";
+
+  document.getElementById("submit-score").hidden = true;
+
+  timerDisplay.textContent = "0.0s";
+  wpmDisplay.textContent = "0 WPM";
+  accuracyDisplay.textContent = "100%";
+  scoreDisplay.textContent = "0";
   
   is_random = document.getElementById('rand').checked;
   progression_type = document.querySelector('input[name = progression]:checked').value
@@ -168,7 +245,11 @@ function startGame() {
   highlightPosition = 0;
   quote.childNodes[highlightPosition].className = "highlight";
   
-  startTime = new Date().getTime();
+  
+  startTime = Date.now();
+  gameStartTime = performance.now();
+
+  timerInterval = setInterval(updateStats, 100);
   
   document.body.className = "";
   
@@ -182,25 +263,27 @@ function checkInput() {
   const typedValue = input.value.trim();
 
   if (is_playing == false) {
-    input.value = ""; // empty the text input
-    return;
-  }
-  if (typedValue == "@") {
-    console.log("cheat code for testing game");
-    input.value = ""; // empty the text input
-    gameOver();
+    input.value = "";
+    previousTypedValue = input.value;
     return;
   }
   if (currentWord !== typedValue) {
     
     if (currentWord.startsWith(typedValue) == true) {
+      previousTypedValue = "";
       input.className = "";
     } else {
       input.className = "error";
       console.log("mistake");
-      num_errors++;
+      if (
+        typedValue.length > previousTypedValue.length &&
+        !currentWord.startsWith(typedValue)
+      ) {
+        mistakeCount++;
+        num_errors = mistakeCount;
+      }
     }
-    
+    previousTypedValue = input.value;
     return;
   }
   
@@ -232,13 +315,57 @@ function gameOver() {
   lastPlayedTs = new Date();
 
   elapsedTime = new Date().getTime() - startTime;
-  // let time_taken = (elapsedTime/1000);
-  // console.log(`Time taken is: ${Math.round(time_taken)}`)
+  
+  clearInterval(timerInterval);
+
+  const seconds = Math.max(
+    0.1,
+    (performance.now() - gameStartTime) / 1000
+  );
+
+  const stats = calculateStats(seconds);
+
+  timerDisplay.textContent = seconds.toFixed(1) + "s";
+  wpmDisplay.textContent = stats.wpm + " WPM";
+  accuracyDisplay.textContent = stats.accuracy + "%";
+  scoreDisplay.textContent = stats.score;
+
+  latestResult = {
+    score: stats.score,
+    wpm: stats.wpm,
+    accuracy: stats.accuracy,
+    duration_seconds: Number(seconds.toFixed(2)),
+    chapter: ch_index + 1,
+    shloka: sh_index + 1,
+    errors: mistakeCount
+  };
+
+  const best = Number(
+    localStorage.getItem("gita_personal_best") || 0
+  );
+
+  if (stats.score > best) {
+    localStorage.setItem(
+      "gita_personal_best",
+      String(stats.score)
+    );
+  }
+
+  document.getElementById("personal-best").textContent =
+    "Personal Best: " +
+    localStorage.getItem("gita_personal_best");
+
+  document.getElementById("submit-score").hidden = false;
+  
   
   message.innerHTML = `
-    <span class="congrats">Congrats!</span>
-    <br> You finished in ${elapsedTime/1000} seconds with ${num_errors} typos
-    `;
+    <span class="congrats">Congratulations!</span>
+    <br>Completed in ${seconds.toFixed(1)} seconds
+    <br>Speed: ${stats.wpm} WPM
+    <br>Accuracy: ${stats.accuracy}%
+    <br>Mistakes: ${mistakeCount}
+    <br><strong>Final Score: ${stats.score}/1000</strong>
+  `;
   
   quote.innerHTML = `<span class="quote">Verse: ${quotes[ch_index][sh_index].split(",").join("<br>")}</span>`;
   meaning.innerHTML = `<span class="meaning">Meaning: ${meanings[ch_index][sh_index]}</span>`;
