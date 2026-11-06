@@ -152,34 +152,75 @@ function calculateStats(seconds) {
   return { wpm, accuracy, score };
 }
 
+
 function updateStats() {
-  if (!is_playing) return;
+  if (!is_playing || !quoteText || !wordQueue) return;
 
-  const seconds = (performance.now() - gameStartTime) / 1000;
+  const seconds =
+    (performance.now() - gameStartTime) / 1000;
 
-  timerDisplay.textContent = seconds.toFixed(1) + "s";
+  // Update timer
+  timerDisplay.textContent =
+    seconds.toFixed(1) + "s";
 
-  // Live speed based on correctly completed words.
-  const completedCharacters =
-    quoteText.length -
-    wordQueue.join(" ").length;
+  // Characters successfully completed
+  const remainingText = wordQueue.join(" ");
 
-  const liveWpm = Math.max(
+  const completedCharacters = Math.max(
+    0,
+    quoteText.length - remainingText.length
+  );
+
+  // Include correctly typed characters in current word
+  const currentWord = wordQueue[0]?.replaceAll(",", "") || "";
+  const typedText = input.value.trim();
+
+  let correctCurrentCharacters = 0;
+
+  for (let i = 0; i < typedText.length; i++) {
+    if (typedText[i] === currentWord[i]) {
+      correctCurrentCharacters++;
+    } else {
+      break;
+    }
+  }
+
+  const totalCorrect =
+    completedCharacters + correctCurrentCharacters;
+
+  // Words per minute
+  const wpm = Math.round(
+    (totalCorrect / 5 / Math.max(seconds, 0.1)) * 60
+  );
+
+  // Approximate accuracy
+  const accuracy = Math.max(
     0,
     Math.round(
-      (completedCharacters / 5 / Math.max(seconds, 0.1)) * 60
+      (totalCorrect /
+        Math.max(totalCorrect + mistakeCount, 1)) * 100
     )
   );
 
-  wpmDisplay.textContent = liveWpm + " WPM";
+  // Live score
+  const score = Math.min(
+    1000,
+    Math.round(wpm * 10 * (accuracy / 100))
+  );
 
-  const stats = calculateStats(seconds);
-  accuracyDisplay.textContent = stats.accuracy + "%";
-  scoreDisplay.textContent = stats.score;
+  wpmDisplay.textContent = wpm + " WPM";
+  accuracyDisplay.textContent = accuracy + "%";
+  scoreDisplay.textContent = score;
 }
 
-
 function startGame() {
+
+  if (!quotes || !meanings) {
+    console.error("Bhagavad Gita data has not loaded.");
+    message.textContent =
+      "The verses are still loading. Please try again.";
+    return;
+  }
 
   console.log("new game started!");
   is_playing = true;

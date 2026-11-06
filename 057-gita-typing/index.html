@@ -38,23 +38,23 @@
     <p id="quote"></p>
     <p id="message"></p>
     
-    <p class="tooltip"><div>
+    <div class="tooltip">
       <button id="share" onclick="ShareIt()" onmouseout="outFunc()">
       <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
       
       </button>
-    </div></p>
+    </div>
     
     <p id="meaning"></p>
     <div id="viswaroopa"></div>
     <input type="text" id="typedValue">
     <main>
-    <p id="settings"><div>
+    <div id="settings">
       Shloka progression:
     <input type="radio" id="rand" name="progression" value="1"><label for="rand"> Random </label>
     <input type="radio" id="seq"  name="progression" value="0" checked="checked"><label for="seq"> Sequential </label>
     <input type="radio" id="nectar"  name="progression" value="2"><label for="nectar"> 51 key verses </label>
-    </div></p>
+    </div>
     </main>
     <script>
       if ("serviceWorker" in navigator) {
