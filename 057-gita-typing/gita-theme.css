@@ -1,0 +1,54 @@
+/* Load after the shared Zat.am game-theme.css and existing style.css. */
+body { margin:0; background:#fff3e0; color:#252525; font-family:Arial,sans-serif; }
+.gita-shell {display:block;max-width:1100px;margin:30px auto;padding:20px;line-height:1.5}
+.gita-card {background:#fff;border-radius:20px;padding:36px;text-align:center;box-shadow:0 8px 25px #00000014}
+.gita-header h1 {font-size:clamp(1.8rem,4vw,2.7rem);color:#2f5d8c;margin:0 0 12px}
+.gita-header p {font-size:1rem;color:#555;margin:0 0 24px}
+.gita-toolbar,.gita-actions {display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:15px 0}
+.gita-btn {display:inline-flex;align-items:center;justify-content:center;margin:0;padding:12px 20px;border-radius:10px;background:#e8eef5;color:#23364a;font-size:1rem;border:0;cursor:pointer;width:auto}
+.gita-primary {background:#2f5d8c;color:white}
+.gita-btn:disabled {opacity:.55;cursor:not-allowed}
+.gita-stats {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:22px auto;max-width:800px}
+.gita-stat {padding:16px 8px;background:#f1f6fb;border-radius:12px;border:1px solid #dce6f0}
+.gita-stat small {display:block;font-size:.72rem;color:#526578;letter-spacing:.06em}
+.gita-stat strong {display:block;font-size:1.4rem;color:#2f5d8c;margin-top:5px}
+.gita-verse {font-size:1.45rem;line-height:2.3;margin:22px auto;max-width:900px;overflow-wrap:anywhere}
+.gita-verse span {display:inline-block;margin-right:6px}
+.gita-verse .highlight {background:#fff0b3;color:#242424;border-radius:5px;padding:0 3px;text-decoration:none}
+#typedValue {display:block;width:min(500px,100%);margin:16px auto;padding:14px 18px;font-size:1.15rem;border:2px solid #cbd7e2;border-radius:10px;box-shadow:none}
+#typedValue.error {background:#ffdedc;border-color:#d52b2b}
+#reference,#message,#meaning,#personal-best {font-size:1rem;color:#34495e}
+#meaning {line-height:1.7;max-width:850px;margin:20px auto}
+.gita-share #share {margin:15px auto;font-size:.95rem;padding:10px 20px;border-radius:10px;background:#e8eef5;color:#23364a}
+.gita-leaderboard-link {display:inline-block;margin:15px;color:#2f5d8c;font-weight:700}
+.gita-overlay {position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10000}
+.gita-overlay[hidden] {display:none}
+.gita-dialog {background:#fff;color:#222;max-width:480px;width:100%;border-radius:18px;padding:28px;text-align:center;box-shadow:0 12px 40px #0004}
+.gita-dialog h2 {font-size:1.5rem;color:#2f5d8c;margin:0 0 16px}
+.gita-final {font-size:2.5rem;font-weight:800;color:#2f5d8c;margin:10px 0}
+.gita-options {display:flex;flex-direction:column;align-items:flex-start;gap:12px;margin:20px auto;max-width:220px}
+.gita-options label {font-size:1rem;cursor:pointer}
+.gita-footer {padding:24px;text-align:center;font-size:.8rem;color:#555}
+.gita-footer a {color:#2f5d8c}
+#viswaroopa img {max-width:260px;width:100%;height:auto;margin:10px auto}
+@media(max-width:600px){.gita-card{padding:18px}.gita-shell{padding:12px}.gita-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.gita-verse{font-size:1.1rem}}
+
+/* Clear word spacing and natural verse wrapping */
+#quote.gita-verse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.55rem 0.65rem;
+  line-height: 2;
+  max-width: 900px;
+  margin-inline: auto;
+  text-align: center;
+}
+#quote.gita-verse > span { display: inline-block; white-space: nowrap; }
+#quote.gita-verse > span.highlight {
+  border-radius: 6px;
+  padding-inline: 5px;
+  background: rgba(255,195,18,.18);
+}
+#pause-game:disabled { opacity: .5; cursor: not-allowed; }

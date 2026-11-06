@@ -1,112 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Bhagavad Gita Typing Game</title>
-    <link rel="stylesheet" href="style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1" >
-    <script src="script.js" defer></script>
-    <link rel="icon" href="Gita_typing_game.png" type="image/x-icon">
-    <link rel="manifest" href="manifest.json" >
-  </head>
-  <body data-page="games">
-
-    <!-- Shared Zat.am Navbar -->
-    <div id="navbar-mount"></div>
-
-    <h1>
-      Bhagavad Gita typing game
-    </h1>
-    
-    <p id="info">
-      Practice your typing skills with a verse from the Sacred book. 
-      When you get it right, you will see the meaning of the shloka.
-      <br>
-      <br> Click the start game button to begin
-    </p>
-    <button type="button" class="button" id="start">
-      Start Game <i class="rocket"></i>
-    </button>
-    
-  <div id="game-stats" class="game-stats" aria-live="off">
-    <div>Time: <strong id="timer">0.0s</strong></div>
-    <div>Speed: <strong id="wpm">0 WPM</strong></div>
-    <div>Accuracy: <strong id="accuracy">100%</strong></div>
-    <div>Score: <strong id="score">0</strong></div>
-  </div>
-
-    <p id="reference"></p>
-    <p id="quote"></p>
-    <p id="message"></p>
-    
-    <div class="tooltip">
-      <button id="share" onclick="ShareIt()" onmouseout="outFunc()">
-      <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
-      
-      </button>
-    </div>
-    
-    <p id="meaning"></p>
-    <div id="viswaroopa"></div>
-    <input type="text" id="typedValue">
-    <main>
-    <div id="settings">
-      Shloka progression:
-    <input type="radio" id="rand" name="progression" value="1"><label for="rand"> Random </label>
-    <input type="radio" id="seq"  name="progression" value="0" checked="checked"><label for="seq"> Sequential </label>
-    <input type="radio" id="nectar"  name="progression" value="2"><label for="nectar"> 51 key verses </label>
-    </div>
-    </main>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", function() {
-          navigator.serviceWorker
-            .register("serviceWorker.js")
-            .then(res => console.log("service worker registered"))
-            .catch(err => console.log("service worker not registered", err))
-        })
-      }
-    </script>
-
-    
-<section id="leaderboard" class="leaderboard">
-  <h2>🏆 Bhagavad Gita Leaderboard</h2>
-  <p id="personal-best">Personal Best: 0</p>
-
-  <div id="submit-score" hidden>
-    <label for="player-name">Your name</label>
-    <input id="player-name" maxlength="24"
-           placeholder="Enter your name">
-    <button type="button" id="save-score">
-      Submit Score
-    </button>
-    <p id="save-status" role="status"></p>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Rank</th>
-        <th>Player</th>
-        <th>Score</th>
-        <th>WPM</th>
-        <th>Accuracy</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body">
-      <tr><td colspan="5">Loading...</td></tr>
-    </tbody>
-  </table>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bhagavad Gita Typing Game | Zat.am</title>
+<link rel="stylesheet" href="../shared/game-theme.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="gita-theme.css">
+<link rel="icon" href="Gita_typing_game.png" type="image/png">
+<link rel="manifest" href="manifest.json">
+<script type="module" src="../js/game-score.js"></script>
+<script src="script.js" defer></script>
+</head>
+<body data-page="games">
+<div id="navbar-mount"></div>
+<main class="gita-shell">
+<section class="gita-card">
+<header class="gita-header"><h1>Bhagavad Gita Typing Game</h1>
+<p id="info">Type each word of the shloka correctly to discover its meaning.</p></header>
+<div class="gita-toolbar"><button type="button" id="start" class="gita-btn gita-primary">Start Game</button><button type="button" id="pause-game" class="gita-btn" disabled>Pause</button><button type="button" id="settings-button" class="gita-btn">⚙ Settings</button></div>
+<div id="game-stats" class="gita-stats">
+<div class="gita-stat"><small>TIME</small><strong id="timer">0.0s</strong></div>
+<div class="gita-stat"><small>WPM</small><strong id="wpm">0 WPM</strong></div>
+<div class="gita-stat"><small>ACCURACY</small><strong id="accuracy">100%</strong></div>
+<div class="gita-stat"><small>SCORE</small><strong id="score">0</strong></div>
+</div>
+<p id="reference"></p><div id="quote" class="gita-verse"></div><p id="message" aria-live="polite"></p>
+<input type="text" id="typedValue" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the highlighted shloka word" placeholder="Type the highlighted word...">
+<p id="meaning"></p><div id="viswaroopa"></div>
+<div class="gita-share"><button id="share" type="button" onclick="ShareIt()" onmouseout="outFunc()"><span id="myTooltip">Share result</span></button></div>
+<p id="personal-best">Personal Best: 0/100</p>
+<a class="gita-leaderboard-link" href="../leaderboard.html">🏆 View Zat.am Leaderboard</a>
 </section>
-
-  <footer>
-    <span style="white-space: nowrap"> &copy; 2023 <a href="https://www.pradeepd.com/hobbies/apps">Pradeep D</a>, <a href="https://www.iseek.page">iSeek</a>. Ref: T.N. Sethumadhavan, 2010, "Srimad Bhagavad Gita", esamskriti.com </span>
- </footer>
-  
-
-    <!-- Shared Zat.am Navbar -->
-    <script
-      type="module"
-      src="../js/navbar-loader.js"
-    ></script>
-</body>
-</html>
+</main>
+<div class="gita-overlay" id="settings-modal" hidden><section class="gita-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-heading"><h2 id="settings-heading">Game Settings</h2><p>Shloka progression</p><div id="settings" class="gita-options"><label><input type="radio" id="rand" name="progression" value="1"> Random</label><label><input type="radio" id="seq" name="progression" value="0" checked> Sequential</label><label><input type="radio" id="nectar" name="progression" value="2"> 51 key verses</label></div><button id="close-settings" class="gita-btn gita-primary">Done</button></section></div>
+<div class="gita-overlay" id="result-modal" hidden><section class="gita-dialog" role="dialog" aria-modal="true" aria-labelledby="result-heading"><h2 id="result-heading">🎉 Shloka Completed!</h2><p class="gita-final" id="result-score">0/100</p><p id="result-details"></p><p id="submit-status" role="status"></p><div class="gita-actions"><button id="submit-final-score" class="gita-btn gita-primary">Submit Score</button><button id="retry-game" class="gita-btn">Try Again</button><button id="close-result" class="gita-btn">Close</button></div></section></div>
+<footer class="gita-footer">Original game © 2023 <a href="https://www.pradeepd.com/hobbies/apps">Pradeep D</a>, <a href="https://www.iseek.page">iSeek</a>. Ref: T.N. Sethumadhavan, Srimad Bhagavad Gita.</footer>
+<script type="module" src="../js/navbar-loader.js"></script>
+<script>if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./serviceWorker.js').catch(console.error));</script>
+</body></html>

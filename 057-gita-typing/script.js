@@ -10,6 +10,82 @@ const settings = document.getElementById("settings");
 const share =  document.getElementById("share");
 const tooltip = document.getElementById("myTooltip");
 
+// Zat.am shared leaderboard: initialized after module load.
+let zatamReady = false;
+let isPaused = false;
+let pauseStartedAt = 0;
+window.addEventListener("load", () => {
+  if (window.zatamScore) {
+    window.zatamScore.init({
+      gameId: "057-gita-typing",
+      gameName: "Bhagavad Gita Typing Game"
+    });
+    zatamReady = true;
+  } else {
+    console.error("Shared Zat.am game-score.js did not load");
+  }
+});
+const resultModal = () => document.getElementById("result-modal");
+function closeResultModal() { resultModal().hidden = true; }
+window.closeResultModal = closeResultModal;
+function calculateFinalScore(wpm, mistakes) {
+  const base = wpm >= 60 ? 100 : wpm >= 50 ? 90 :
+    wpm >= 40 ? 80 : wpm >= 30 ? 70 :
+    wpm >= 20 ? 60 : wpm >= 10 ? 50 : 40;
+  return Math.max(0, Math.min(100, base - mistakes * 2));
+}
+async function submitZatamScore() {
+  const status = document.getElementById("submit-status");
+  const button = document.getElementById("submit-final-score");
+  if (!latestResult || !zatamReady) {
+    status.textContent = "Leaderboard is not ready. Refresh and try again.";
+    return;
+  }
+  button.disabled = true;
+  status.textContent = "Submitting score...";
+  try {
+    const result = await window.zatamScore.submit(latestResult.score, {
+      metrics: {
+        elapsedSeconds: latestResult.duration_seconds,
+        wpm: latestResult.wpm,
+        accuracy: latestResult.accuracy,
+        mistakes: latestResult.errors,
+        chapter: latestResult.chapter,
+        shloka: latestResult.shloka
+      }
+    });
+    if (result.ok) {
+      status.textContent = "Score submitted to the Zat.am leaderboard!";
+    } else {
+      status.textContent = result.reason === "not-signed-in"
+        ? "Sign in to Zat.am to submit your score. Your result remains visible."
+        : `Could not submit: ${result.reason || "unknown error"}`;
+      if (result.reason !== "already-submitted") button.disabled = false;
+    }
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Submission failed. Please try again.";
+    button.disabled = false;
+  }
+}
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("pause-game")?.addEventListener("click", togglePause);
+  document.getElementById("submit-final-score")?.addEventListener("click", submitZatamScore);
+  document.getElementById("retry-game")?.addEventListener("click", () => {
+    closeResultModal(); startGame();
+  });
+  document.getElementById("close-result")?.addEventListener("click", closeResultModal);
+  document.getElementById("settings-button")?.addEventListener("click", () => {
+    document.getElementById("settings-modal").hidden = false;
+  });
+  document.getElementById("close-settings")?.addEventListener("click", () => {
+    document.getElementById("settings-modal").hidden = true;
+  });
+  document.getElementById("personal-best").textContent =
+    `Personal Best: ${localStorage.getItem("gita_personal_best") || 0}/100`;
+});
+
+
 let quotes, meanings;
 
 // Chapter 1 - https://esamskriti.com/essays/BG-CH-1.pdf
@@ -144,83 +220,72 @@ function calculateStats(seconds) {
     )
   );
 
-  const score = Math.min(
-    1000,
-    Math.round(wpm * 10 * (accuracy / 100))
-  );
+  const score = calculateFinalScore(wpm, mistakeCount);
 
   return { wpm, accuracy, score };
 }
 
-
-function updateStats() {
-  if (!is_playing || !quoteText || !wordQueue) return;
-
-  const seconds =
-    (performance.now() - gameStartTime) / 1000;
-
-  // Update timer
-  timerDisplay.textContent =
-    seconds.toFixed(1) + "s";
-
-  // Characters successfully completed
-  const remainingText = wordQueue.join(" ");
-
-  const completedCharacters = Math.max(
-    0,
-    quoteText.length - remainingText.length
-  );
-
-  // Include correctly typed characters in current word
-  const currentWord = wordQueue[0]?.replaceAll(",", "") || "";
-  const typedText = input.value.trim();
-
-  let correctCurrentCharacters = 0;
-
-  for (let i = 0; i < typedText.length; i++) {
-    if (typedText[i] === currentWord[i]) {
-      correctCurrentCharacters++;
-    } else {
-      break;
-    }
+function togglePause() {
+  if (!is_playing) return;
+  const button = document.getElementById("pause-game");
+  if (!isPaused) {
+    isPaused = true;
+    pauseStartedAt = performance.now();
+    clearInterval(timerInterval);
+    input.disabled = true;
+    button.textContent = "Resume";
+    message.textContent = "Game paused";
+  } else {
+    gameStartTime += performance.now() - pauseStartedAt;
+    isPaused = false;
+    input.disabled = false;
+    button.textContent = "Pause";
+    message.textContent = "";
+    timerInterval = setInterval(updateStats, 100);
+    input.focus();
   }
+}
+function updateStats() {
+  if (!is_playing || isPaused) return;
 
-  const totalCorrect =
-    completedCharacters + correctCurrentCharacters;
+  const seconds = (performance.now() - gameStartTime) / 1000;
 
-  // Words per minute
-  const wpm = Math.round(
-    (totalCorrect / 5 / Math.max(seconds, 0.1)) * 60
-  );
+  timerDisplay.textContent = seconds.toFixed(1) + "s";
 
-  // Approximate accuracy
-  const accuracy = Math.max(
+  // Live speed based on correctly completed words.
+  const completedCharacters =
+    quoteText.length -
+    wordQueue.join(" ").length;
+
+  const liveWpm = Math.max(
     0,
     Math.round(
-      (totalCorrect /
-        Math.max(totalCorrect + mistakeCount, 1)) * 100
+      (completedCharacters / 5 / Math.max(seconds, 0.1)) * 60
     )
   );
 
-  // Live score
-  const score = Math.min(
-    1000,
-    Math.round(wpm * 10 * (accuracy / 100))
-  );
+  wpmDisplay.textContent = liveWpm + " WPM";
 
-  wpmDisplay.textContent = wpm + " WPM";
-  accuracyDisplay.textContent = accuracy + "%";
-  scoreDisplay.textContent = score;
+  const stats = calculateStats(seconds);
+  accuracyDisplay.textContent = stats.accuracy + "%";
+  scoreDisplay.textContent = calculateFinalScore(liveWpm, mistakeCount);
 }
 
-function startGame() {
 
+function startGame() {
   if (!quotes || !meanings) {
-    console.error("Bhagavad Gita data has not loaded.");
-    message.textContent =
-      "The verses are still loading. Please try again.";
+    message.textContent = "Verses are loading. Please try again shortly.";
     return;
   }
+  if (zatamReady) window.zatamScore.reset();
+  isPaused = false;
+  input.disabled = false;
+  document.getElementById("pause-game").disabled = false;
+  document.getElementById("pause-game").textContent = "Pause";
+  if (resultModal()) resultModal().hidden = true;
+  document.getElementById("submit-final-score").disabled = false;
+  document.getElementById("submit-status").textContent = "";
+
 
   console.log("new game started!");
   is_playing = true;
@@ -235,7 +300,7 @@ function startGame() {
   input.value = "";
   input.className = "";
 
-  document.getElementById("submit-score").hidden = true;
+  
 
   timerDisplay.textContent = "0.0s";
   wpmDisplay.textContent = "0 WPM";
@@ -282,9 +347,15 @@ function startGame() {
   wordQueue = quoteText.split(" ");
   
   reference.innerHTML = `Chapter: ${ch_index+1}, Shloka: ${sh_index+1}`
-  quote.innerHTML = wordQueue.map((word) => `<span>${word}</span>`).join("").split(",").join("<br>");
+  // Individual word elements; flex wrapping preserves readable spacing.
+  quote.replaceChildren();
+  wordQueue.forEach(word => {
+    const span = document.createElement("span");
+    span.textContent = word;
+    quote.appendChild(span);
+  });
   highlightPosition = 0;
-  quote.childNodes[highlightPosition].className = "highlight";
+  quote.children[highlightPosition].className = "highlight";
   
   
   startTime = Date.now();
@@ -303,7 +374,7 @@ function checkInput() {
   const currentWord = wordQueue[0].replaceAll(',','');
   const typedValue = input.value.trim();
 
-  if (is_playing == false) {
+  if (is_playing == false || isPaused) {
     input.value = "";
     previousTypedValue = input.value;
     return;
@@ -311,7 +382,6 @@ function checkInput() {
   if (currentWord !== typedValue) {
     
     if (currentWord.startsWith(typedValue) == true) {
-      previousTypedValue = "";
       input.className = "";
     } else {
       input.className = "error";
@@ -329,10 +399,12 @@ function checkInput() {
   }
   
 
+  previousTypedValue = "";
+  input.className = "";
   wordQueue.shift(); // shift removes the first item in the array (the 0th element)
   input.value = ""; // empty the text input
 
-  quote.childNodes[highlightPosition].className = "";
+  quote.children[highlightPosition].className = "";
   highlightPosition++;
 
   if (wordQueue.length === 0) {
@@ -341,7 +413,7 @@ function checkInput() {
     return;
   }
 
-  quote.childNodes[highlightPosition].className = "highlight";
+  quote.children[highlightPosition].className = "highlight";
 }
 
 let elapsedTime;
@@ -358,6 +430,7 @@ function gameOver() {
   elapsedTime = new Date().getTime() - startTime;
   
   clearInterval(timerInterval);
+  document.getElementById("pause-game").disabled = true;
 
   const seconds = Math.max(
     0.1,
@@ -394,9 +467,12 @@ function gameOver() {
 
   document.getElementById("personal-best").textContent =
     "Personal Best: " +
-    localStorage.getItem("gita_personal_best");
+    (localStorage.getItem("gita_personal_best") || "0") + "/100";
 
-  document.getElementById("submit-score").hidden = false;
+  document.getElementById("result-score").textContent = `${stats.score}/100`;
+  document.getElementById("result-details").textContent =
+    `${seconds.toFixed(1)}s · ${stats.wpm} WPM · ${stats.accuracy}% accuracy · ${mistakeCount} mistakes`;
+  resultModal().hidden = false;
   
   
   message.innerHTML = `
@@ -405,7 +481,7 @@ function gameOver() {
     <br>Speed: ${stats.wpm} WPM
     <br>Accuracy: ${stats.accuracy}%
     <br>Mistakes: ${mistakeCount}
-    <br><strong>Final Score: ${stats.score}/1000</strong>
+    <br><strong>Final Score: ${stats.score}/100</strong>
   `;
   
   quote.innerHTML = `<span class="quote">Verse: ${quotes[ch_index][sh_index].split(",").join("<br>")}</span>`;
@@ -427,7 +503,7 @@ function gameOver() {
   }
   document.body.className = "viswaroopa";
 //  document.body.className = "winner";
-  ShareIt();
+  // Sharing is optional; do not auto-open the native share sheet.
 }
 
 var copyText;
