@@ -366,6 +366,14 @@ export const menu = [
     desc: `Practice typing on English (Harvard-Kyoto) transliteration of the shlokas from Bhagavad Gita`,
   },
   {
+    id: 61,
+    title: "Sanskrit Pronunciation",
+    category: "RG",
+    dir: "061-sanskrit-pronunciation",
+    cover: "./061-sanskrit-pronunciation/cover.png",
+    desc: `Practice Sanskrit pronunciation through interactive exercises.`,
+  },
+  {
     id: 28,
     title: "शीघ्रम् आगमिष्यति ...",
     category: "TA",
@@ -490,7 +498,7 @@ function getGameCover(item) {
     return "./शत.म्.png";
   }
 
-  return `./${item.dir}/cover.jpg`;
+  return item.cover || `./${item.dir}/cover.jpg`;
 }
 
 // =====================================================
