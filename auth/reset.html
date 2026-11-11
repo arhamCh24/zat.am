@@ -1,26 +1,87 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - zat.am</title>
-    <link rel="stylesheet" href="./css/style.css" />
-</head>
-<body>
-    <div class="container">
-      <div class="form-box">
-        <div class="forgot-password">
-          <h2>Forgot your password?</h2>
-          <div class="header-divider"></div>
-
-          <form id="reset-form">
-            <p class="user-message">Enter your email address below and we'll send you a link to reset your password.</p>
-            <input type="email" id="reset-email" placeholder="Email Address" required data-cy="reset-email" />
-            <button class="create-btn" type="submit" data-cy="reset-btn">RESET PASSWORD</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fffaf2" />
+    <title>Reset Password | Zat.am</title>
+    <link rel="stylesheet" href="./css/auth-theme.css" />
+  </head>
+  <body class="zatam-auth-page" data-page="reset">
+    <div id="navbar-mount"></div>
+    <main class="auth-main">
+      <div class="auth-layout">
+        <section class="auth-story" aria-labelledby="auth-story-title">
+          <p class="auth-eyebrow">WELCOME TO ZAT.AM</p>
+          <h1 id="auth-story-title">Your journey continues here.</h1>
+          <div class="auth-story-underline" aria-hidden="true"></div>
+          <p class="auth-story-description">
+            A quick reset is all it takes to get back to your games, your
+            progress, and your Sanskrit journey.
+          </p>
+          <div class="auth-story-features" aria-label="Zat.am highlights">
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">✦</span
+              ><span>Play and learn through Sanskrit games</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">★</span
+              ><span>Save scores and celebrate progress</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">अ</span
+              ><span>Explore a language-rich experience</span>
+            </div>
+          </div>
+          <div class="auth-letter-tiles" aria-hidden="true">
+            <span>अ</span><span>आ</span><span>क</span>
+          </div>
+          <a class="auth-back-link" href="../index.html">← Back to Games</a>
+        </section>
+        <section class="auth-panel" aria-labelledby="reset-heading">
+          <div class="auth-panel-top">
+            <p class="auth-kicker">ACCOUNT RECOVERY</p>
+            <h2 id="reset-heading">Reset your password</h2>
+            <span class="auth-panel-underline" aria-hidden="true"></span>
+            <p class="auth-panel-copy">
+              Enter the email address connected to your account. We'll send you
+              a password reset link.
+            </p>
+          </div>
+          <form id="reset-form" class="auth-form">
+            <div class="auth-field">
+              <label for="reset-email">Email address</label
+              ><input
+                type="email"
+                id="reset-email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+                data-cy="reset-email"
+              />
+            </div>
+            <button
+              type="submit"
+              class="auth-btn auth-btn-primary"
+              data-cy="reset-btn"
+            >
+              Send Reset Link <span aria-hidden="true">→</span>
+            </button>
           </form>
-          <div id="errormessage" data-cy="message"></div>
+          <p class="auth-switch"><a href="login.html">← Back to sign in</a></p>
+          <div
+            id="errormessage"
+            class="auth-message"
+            data-cy="message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </section>
       </div>
-    </div>
+    </main>
+    <script type="module" src="../js/navbar-loader.js"></script>
+    <script type="module" src="./js/auth-ui.js"></script>
     <script type="module" src="./js/reset.js"></script>
-</body>
+  </body>
 </html>

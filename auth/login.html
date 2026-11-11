@@ -3,74 +3,138 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - zat.am</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
-    />
-    <!-- styles -->
-    <link rel="stylesheet" href="./css/style.css" />
+    <meta name="theme-color" content="#fffaf2" />
+    <title>Sign In | Zat.am</title>
+    <link rel="stylesheet" href="./css/auth-theme.css" />
   </head>
-  <body>
-    <div class="container">
-      <div class="form-box">
-        <div class="welcome">
-          <h2 class="san-welcome">स्वागतम</h2>
-          <h2 class="eng-welcome">Welcome Back</h2>
-          <div class="header-divider"></div>
-        </div>
-        <form id="login-form">
-          <input
-            type="email"
-            id="signin-email"
-            placeholder="Email Address"
-            required
-            data-cy="signin-email"
-          />
-          <input
-            type="password"
-            id="signin-password"
-            placeholder="Password"
-            required
-            data-cy="signin-password"
-          />
-          <button class="signin-btn" type="submit" data-cy="signin-btn">
-            SIGN IN
-          </button>
-        </form>
-
-        <div class="option-text">or continue with</div>
-        <div class="social-login">
-          <button id="google-signin" class="google-btn" data-cy="signin-google">
-            <i class="fab fa-google google-icon"></i>Sign in with Google
-          </button>
-        </div>
-        <div class="divider"></div>
-
-        <div id="btm-login">
-          <p>
-            Don't have an account?
-            <a href="signup.html" data-cy="signup-link">Sign Up</a>
+  <body class="zatam-auth-page" data-page="login">
+    <div id="navbar-mount"></div>
+    <main class="auth-main">
+      <div class="auth-layout">
+        <section class="auth-story" aria-labelledby="auth-story-title">
+          <p class="auth-eyebrow">WELCOME TO ZAT.AM</p>
+          <h1 id="auth-story-title">
+            A world of Sanskrit, one game at a time.
+          </h1>
+          <div class="auth-story-underline" aria-hidden="true"></div>
+          <p class="auth-story-description">
+            Sign in to discover new challenges, practice your skills, and pick
+            up right where you left off.
           </p>
-          <p>
-            <a
-              href="reset.html"
-              data-cy="reset-link"
-              class="forgot"
-              id="forgot-pswd"
-              data-cy="forgot-pswd"
-              >Forgot Password?</a
+          <div class="auth-story-features" aria-label="Zat.am highlights">
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">✦</span
+              ><span>Play and learn through Sanskrit games</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">★</span
+              ><span>Save scores and celebrate progress</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">अ</span
+              ><span>Explore a language-rich experience</span>
+            </div>
+          </div>
+          <div class="auth-letter-tiles" aria-hidden="true">
+            <span>अ</span><span>आ</span><span>क</span>
+          </div>
+          <a class="auth-back-link" href="../index.html">← Back to Games</a>
+        </section>
+        <section class="auth-panel" aria-labelledby="login-heading">
+          <div class="auth-panel-top">
+            <p class="auth-kicker">WELCOME BACK</p>
+            <h2 id="login-heading">Sign in to Zat.am</h2>
+            <span class="auth-panel-underline" aria-hidden="true"></span>
+            <p class="auth-panel-copy">
+              Pick up where you left off and keep your learning journey going.
+            </p>
+          </div>
+          <form id="login-form" class="auth-form">
+            <div class="auth-field">
+              <label for="signin-email">Email address</label>
+              <input
+                type="email"
+                id="signin-email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+                data-cy="signin-email"
+              />
+            </div>
+            <div class="auth-field">
+              <div class="auth-field-label-row">
+                <label for="signin-password">Password</label
+                ><a
+                  href="reset.html"
+                  class="auth-inline-link"
+                  data-cy="reset-link"
+                  id="forgot-pswd"
+                  >Forgot password?</a
+                >
+              </div>
+              <div class="auth-password-wrap">
+                <input
+                  type="password"
+                  id="signin-password"
+                  name="password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                  data-cy="signin-password"
+                />
+                <button
+                  class="auth-password-toggle"
+                  data-password-toggle="signin-password"
+                  type="button"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+            <button
+              class="auth-btn auth-btn-primary"
+              type="submit"
+              data-cy="signin-btn"
             >
+              Sign In <span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <div class="auth-separator"><span>or continue with</span></div>
+          <button
+            id="google-signin"
+            type="button"
+            class="auth-btn auth-btn-google"
+            data-cy="signin-google"
+          >
+            <span class="auth-google-icon" aria-hidden="true">G</span> Continue
+            with Google
+          </button>
+          <p class="auth-switch">
+            New to Zat.am?
+            <a href="signup.html" data-cy="signup-link">Create an account</a>
           </p>
-          <p>
-            <a href="#" id="resend-verification" style="display: none"
-              >Resend Verification Email</a
-            >
-          </p>
-          <div id="message" data-cy="message"></div>
-        </div>
+          <a
+            href="#"
+            id="resend-verification"
+            class="auth-resend"
+            style="display: none"
+            >Resend verification email</a
+          >
+          <div
+            id="message"
+            class="auth-message"
+            data-cy="message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </section>
       </div>
-    </div>
+    </main>
+    <script type="module" src="../js/navbar-loader.js"></script>
+    <script type="module" src="./js/auth-ui.js"></script>
     <script type="module" src="./js/login.js"></script>
   </body>
 </html>
