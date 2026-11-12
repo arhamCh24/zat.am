@@ -1,7 +1,7 @@
-const cacheName = "shiva_sutra_scoring_v1";
+const cacheName = "shiva_sutra_scoring_v2";
 const base = new URL("./", self.location.href);
 const local = ["localhost", "127.0.0.1", "[::1]"].includes(base.hostname);
-const assets = ["./", "./index.html", "./style.css?direct&v=score2", "./script.js?v=score2", "./Maheshwarani_Sutras.jpg", "../shared/game-theme.css"].map(path => new URL(path, base).href);
+const assets = ["./", "./index.html", "./style.css?direct&v=score2", "./script.js?v=cleanup-2", "./Maheshwarani_Sutras.jpg", "../shared/game-theme.css"].map(path => new URL(path, base).href);
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     if (!local) await (await caches.open(cacheName)).addAll(assets);
@@ -10,7 +10,7 @@ self.addEventListener("install", event => {
 });
 self.addEventListener("activate", event => {
   event.waitUntil((async () => {
-    await caches.delete("shiva_sutra_game");
+    await Promise.all(["shiva_sutra_game", "shiva_sutra_scoring_v1"].map(name => caches.delete(name)));
     await self.clients.claim();
   })());
 });

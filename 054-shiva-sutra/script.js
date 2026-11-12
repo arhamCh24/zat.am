@@ -14,20 +14,13 @@ const alphabets_devanagiri = ["अ","इ","उ","ऋ","ऌ","ए","ऐ","ओ","�
 let sutra, alphabets, challenge, num_moves = 0;
 
 var tiles = document.querySelectorAll(".tile");
-var board = [[]], starter_board = [[]];
+var board = [[]];
 let IndxArr = [];
 
 var cols = 4;
 var rows = 4;
 
-/*
-document.addEventListener("DOMContentLoaded", function(){
-  board = randomizeBoard();
-  drawBoard(board);
-});
-*/
-
-let script_id = 1, challenge_id = 1;
+let challenge_id = 1;
 
 function CreateGame() {
   if (savingScore) return;
@@ -43,7 +36,6 @@ function CreateGame() {
   image.innerHTML = ``;
   info.innerHTML = ``;
 
-  script_id = 1;
   sutra = sutra_devanagiri;
   alphabets = alphabets_devanagiri;
 
@@ -65,20 +57,16 @@ function CreateGame() {
 
     challenge = rnd.map(i => alphabets[i]);
     challenge.push("space");
-    puzz = [];
   }
 
   num_moves = 0;
 
   do {
-    console.log('Generating new board');
     board = randomizeBoard(1);
 
   } while(checkIfSolvable(board) == false || checkForWin(challenge));
 
-  // board = starter_board;
   drawBoard(board);
-  //console.log(canSlide(2,2,board));
 
   puzzle.style.display = "revert";
   check.style.display = "revert";
@@ -160,7 +148,7 @@ function checkIfSolvable(board) {
 }
 
 function randomizeBoard(flag){
-  var pos = challenge; // [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,"space"];
+  var pos = challenge;
   var posArr = [];
   var index;
 
@@ -176,13 +164,11 @@ function randomizeBoard(flag){
     else
       index = 0;
 
-    //console.log(number);
     posArr.push(pos[index]);
 
     pos = pos.filter(function(val,ind){
       return ind != index;
     });
-    //console.log("pos array", pos, i);
   }
   var counter = 0;
   for (let j = 0; j < cols; j++){
@@ -202,12 +188,10 @@ function drawBoard(board){
       tiles[j].className = "tile space";
       tiles[j].innerHTML = "";
       tiles[j].dataset.tileNumber = "space";
-      //console.log(tiles[j]);
     } else {
       tiles[j].className = "tile";
       tiles[j].innerHTML = val;
       tiles[j].dataset.tileNumber = val;
-      //console.log(tiles[j]);
     }
 
   }
@@ -219,7 +203,6 @@ function canSlide(col,row,board){
   var spaceCol = spacePos[0];
   var spaceRow = spacePos[1];
 
-  //console.log('space is ', spaceCol, spaceRow);
   if (((Math.abs(col-spaceCol) === 1) && row-spaceRow === 0) || (Math.abs(row-spaceRow) === 1) && col-spaceCol === 0){
     return true;
   } else {
@@ -280,7 +263,6 @@ function checkForWin(solution){
     }
   }
 
-//  if (board[0][0] == solution[0] && board[1][0] == solution[1] && board[2][0] == solution[2] && board[3][0] == solution[3] && board[0][1] == solution[4] && board[1][1] == solution[5] && board[2][1] == solution[6] && board[3][1] == solution[7] && board[0][2] == solution[8] && board[1][2] == solution[9] && board[2][2] == solution[10] && board[3][2] == solution[11] && board[0][3] == solution[12] && board[1][3] == solution[13] && board[2][3] == solution[14]) {
   if (num_solved_tiles == rows*cols) {
     return true;
   }
@@ -288,7 +270,6 @@ function checkForWin(solution){
   return false;
 }
 
-let is_playing = false;
 
 async function playAudio() {
   if (
@@ -299,7 +280,6 @@ async function playAudio() {
 
   if (!audio_player.paused) {
     audio_player.pause();
-    is_playing = false;
     play_pause.textContent = "Listen";
     return;
   }
@@ -311,29 +291,22 @@ async function playAudio() {
       updateAudioVisibility();
       return;
     }
-    is_playing = true;
     play_pause.textContent = "Pause";
   } catch (error) {
-    is_playing = false;
     play_pause.textContent = "Listen";
     console.warn("Shiva Sutra audio could not play.", error);
   }
 }
 
-let puzz = [];
-
-
 document.addEventListener("keypress", function onPress(event) {
     if (event.key === "@") {
       if (!playing) return;
       practiceRound = true;
-      console.log("cheat code for testing game");
       status.innerHTML = `Game is solved!`;
 
       board = randomizeBoard(0);
       drawBoard(board);
 
-//      GameOver();
       return;
     }
 });
@@ -344,14 +317,11 @@ NewGame.addEventListener('click', CreateGame);
 check.addEventListener('click', CheckGame);
 play_pause.addEventListener('click', playAudio);
 audio_player.addEventListener("ended", (event) => {
-  is_playing = false;
   play_pause.textContent = "Listen";
 });
 
 puzzle.style.display = "none";
 check.style.display = "none";
-
-
 
 // A single move handler per tile keeps move counts accurate across restarts.
 tiles.forEach(tile => tile.addEventListener("click", function () {
@@ -365,7 +335,7 @@ tiles.forEach(tile => tile.addEventListener("click", function () {
   if (checkForWin(challenge)) CheckGame();
 }));
 
-// Match 027-15s's 4x4 scoring; shared scorer owns all leaderboard writes.
+// Shared scorer owns all leaderboard writes.
 const startingScore = 2000;
 const scoreStatus = document.getElementById("score-status");
 const retryScoreButton = document.getElementById("retry-score");
@@ -566,7 +536,6 @@ function updateAudioVisibility() {
   if (!shivaMode) {
     audio_player.pause();
     audio_player.currentTime = 0;
-    is_playing = false;
     play_pause.textContent = "Listen";
   }
 }
