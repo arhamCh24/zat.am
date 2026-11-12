@@ -7,8 +7,8 @@
   <link rel="icon" href="./damaru_1.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="../shared/game-theme.css">
-  <link rel="stylesheet" href="./style.css">
-  <script src="./script.js" defer></script>
+  <link rel="stylesheet" href="./style.css?direct&amp;v=score2">
+  <script src="./script.js?v=share-removed-1" defer></script>
 </head>
 <body class="zatam-themed-game shiva-page" data-page="games">
   <div id="navbar-mount"></div>
@@ -30,12 +30,16 @@
         <div class="shiva-controls">
           <button type="button" id="randomize">New Game</button>
           <button type="button" id="play_pause" class="secondary">Listen</button>
-          <button type="button" id="check" class="secondary">Submit</button>
-          <button type="button" id="share" class="secondary" onclick="ShareIt()" onmouseout="outFunc()">
-            Share <span class="visually-hidden" id="myTooltip">Copy to clipboard</span>
-          </button>
+          <button type="button" id="check" class="secondary">Check arrangement</button>
+        </div>
+        <div class="round-stats" aria-label="Round statistics">
+          <span>Time <strong id="round-time">0:00</strong></span>
+          <span>Moves <strong id="round-moves">0</strong></span>
+          <span>Score <strong id="round-score">100/100</strong></span>
         </div>
         <p id="status" role="status"></p>
+        <p id="score-status" role="status"></p>
+        <button type="button" id="retry-score" hidden>Retry saving score</button>
     <div id="board">
       <div class="tile" data-tile-number="1" data-row="0" data-col="0" id="1" >1</div>
       <div class="tile" data-tile-number="2" data-row="0" data-col="1" id="2" >2</div>
@@ -68,12 +72,20 @@
     </span>
 
         </section>
+        <section class="shiva-panel" aria-labelledby="best-heading">
+          <h2 id="best-heading">Personal best</h2>
+          <p id="best-level">Shiva Sutra</p>
+          <p id="best-score">— / 100</p>
+          <p>Moves: <span id="best-moves">—</span> · Time: <span id="best-time">—</span></p>
+          <p id="best-status" role="status"></p>
+        </section>
         <section class="shiva-panel">
           <h2>How to play</h2>
           <ol>
             <li>Select <strong>New Game</strong> to shuffle the tiles.</li>
             <li>Select a tile next to the empty square to slide it.</li>
             <li>Arrange the tiles left to right, top to bottom, then submit your solution.</li>
+            <li>Scoring start with 2,000 raw points; each second and legal move costs 2. The raw score has a 100-point minimum and is converted to a score out of 100.</li>
           </ol>
         </section>
         <section class="shiva-panel">

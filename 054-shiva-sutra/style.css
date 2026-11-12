@@ -37,3 +37,10 @@
   .shiva-sidebar section:first-child { order: 0; }
   .shiva-sidebar section:not(:first-child) { order: 2; }
 }
+
+.shiva-game .round-stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 20px; padding: 12px; border-radius: 10px; background: #edf4fc; font-variant-numeric: tabular-nums; }
+.shiva-game #best-score { font-size: 1.5rem; font-weight: 700; margin: 8px 0; }
+.shiva-game #best-status, .shiva-game #score-status { font-size: .9rem; color: #52667b; }
+.shiva-game #score-status:empty { display: none; }
+.shiva-game #retry-score { min-height: 42px; padding: 8px 14px; background: #fff; color: var(--zatam-navy); border: 1px solid var(--zatam-navy); border-radius: 9px; cursor: pointer; }
+.shiva-game .tile[aria-disabled="true"] { cursor: default; }
