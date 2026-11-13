@@ -3,54 +3,152 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign Up - zat.am</title>
-    <link rel="stylesheet" href="./css/style.css" />
+    <meta name="theme-color" content="#fffaf2" />
+    <title>Create Account | Zat.am</title>
+    <link rel="stylesheet" href="./css/auth-theme.css" />
   </head>
-  <body>
-    <div class="container">
-      <div class="form-box">
-        <h2>Create Account</h2>
-        <div class="header-divider"></div>
-        <form id="signup-form">
-          <input
-            type="text"
-            id="signup-name"
-            data-cy="signup-name"
-            placeholder="Full Name"
-          />
-          <input
-            type="email"
-            id="signup-email"
-            data-cy="signup-email"
-            placeholder="Email"
-            required
-          />
-          <input
-            type="password"
-            id="signup-password"
-            data-cy="signup-password"
-            placeholder="Password (min 8 characters)"
-            required
-          />
-          <input
-            type="password"
-            id="signup-cpassword"
-            data-cy="signup-cpassword"
-            placeholder="Confirm Password"
-            required
-          />
-          <button type="submit" class="create-btn" data-cy="create-btn">
-            CREATE ACCOUNT
-          </button>
-        </form>
-        <div class="divider"></div>
-        <p>
-          Already have an account?
-          <a href="login.html" data-cy="login-link">Login</a>
-        </p>
-        <div id="message" data-cy="message"></div>
+  <body class="zatam-auth-page" data-page="signup">
+    <div id="navbar-mount"></div>
+    <main class="auth-main">
+      <div class="auth-layout">
+        <section class="auth-story" aria-labelledby="auth-story-title">
+          <p class="auth-eyebrow">YOUR ADVENTURE STARTS HERE</p>
+          <h1 id="auth-story-title">Play. Learn. Discover.</h1>
+          <div class="auth-story-underline" aria-hidden="true"></div>
+          <p class="auth-story-description">
+            Your next Sanskrit adventure is just a few clicks away. Start
+            playing and make every achievement count.
+          </p>
+          <div class="auth-story-features" aria-label="Zat.am highlights">
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">✦</span
+              ><span>Play and learn through Sanskrit games</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">★</span
+              ><span>Save scores and celebrate progress</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">अ</span
+              ><span>Explore a language-rich experience</span>
+            </div>
+          </div>
+          <div class="auth-letter-tiles" aria-hidden="true">
+            <span>अ</span><span>आ</span><span>क</span>
+          </div>
+          <a class="auth-back-link" href="../index.html">← Back to Games</a>
+        </section>
+        <section class="auth-panel" aria-labelledby="signup-heading">
+          <div class="auth-panel-top">
+            <p class="auth-kicker">JOIN THE ADVENTURE</p>
+            <h2 id="signup-heading">Create your account</h2>
+            <span class="auth-panel-underline" aria-hidden="true"></span>
+            <p class="auth-panel-copy">
+              Create a free account to save your progress and join the Zat.am
+              community.
+            </p>
+          </div>
+          <form id="signup-form" class="auth-form">
+            <div class="auth-field">
+              <label for="signup-name">Full name</label
+              ><input
+                type="text"
+                id="signup-name"
+                data-cy="signup-name"
+                name="name"
+                placeholder="Your full name"
+                autocomplete="name"
+              />
+            </div>
+            <div class="auth-field">
+              <label for="signup-email">Email address</label
+              ><input
+                type="email"
+                id="signup-email"
+                data-cy="signup-email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="auth-field">
+              <label for="signup-password">Password</label>
+              <div class="auth-password-wrap">
+                <input
+                  type="password"
+                  id="signup-password"
+                  data-cy="signup-password"
+                  name="password"
+                  placeholder="Create a password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  required
+                  aria-describedby="password-hint"
+                /><button
+                  class="auth-password-toggle"
+                  data-password-toggle="signup-password"
+                  type="button"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  Show
+                </button>
+              </div>
+              <p class="auth-field-hint" id="password-hint">
+                Use at least 8 characters.
+              </p>
+            </div>
+            <div class="auth-field">
+              <label for="signup-cpassword">Confirm password</label>
+              <div class="auth-password-wrap">
+                <input
+                  type="password"
+                  id="signup-cpassword"
+                  data-cy="signup-cpassword"
+                  name="confirm-password"
+                  placeholder="Re-enter your password"
+                  autocomplete="new-password"
+                  required
+                /><button
+                  class="auth-password-toggle"
+                  data-password-toggle="signup-cpassword"
+                  type="button"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                >
+                  Show
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              class="auth-btn auth-btn-primary"
+              data-cy="create-btn"
+            >
+              Create Account <span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <p class="auth-fineprint">
+            We'll send you an email to verify your account before your first
+            sign-in.
+          </p>
+          <p class="auth-switch">
+            Already have an account?
+            <a href="login.html" data-cy="login-link">Sign in</a>
+          </p>
+          <div
+            id="message"
+            class="auth-message"
+            data-cy="message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </section>
       </div>
-    </div>
+    </main>
+    <script type="module" src="../js/navbar-loader.js"></script>
+    <script type="module" src="./js/auth-ui.js"></script>
     <script type="module" src="./js/signup.js"></script>
   </body>
 </html>

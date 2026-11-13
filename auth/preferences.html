@@ -3,74 +3,144 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Preferences - zat.am</title>
-
-    <link rel="stylesheet" href="./css/preferences.css" />
+    <meta name="theme-color" content="#fffaf2" />
+    <title>Preferences | Zat.am</title>
+    <link rel="stylesheet" href="./css/auth-theme.css" />
   </head>
-  <body>
-    <div class="container">
-      <div class="form-box">
-        <h2 data-cy="pref-heading" id="heading">Select Your Preferences</h2>
-        <div class="header-divider"></div>
-
-        <form data-cy="preferences-form" id="preferences-form">
-          <!-- Language -->
-          <div class="form-group">
-            <label for="language">Choose Second Language</label>
-            <select data-cy="language-select" id="language" class="form-input">
-              <option value="">Select Language</option>
-              <option value="be">Bengali (বাংলা)</option>
-              <option value="gu">Gujarati (ગુજરાતી)</option>
-              <option value="ka">Kannada (ಕನ್ನಡ)</option>
-              <option value="ml">Malayalam (മലയാളം)</option>
-              <option value="te">Telugu (తెలుగు)</option>
-              <option value="ta">Tamil (தமிழ்)</option>
-            </select>
+  <body class="zatam-auth-page" data-page="preferences">
+    <div id="navbar-mount"></div>
+    <main class="auth-main">
+      <div class="auth-layout">
+        <section class="auth-story" aria-labelledby="auth-story-title">
+          <p class="auth-eyebrow">A MORE PERSONAL EXPERIENCE</p>
+          <h1 id="auth-story-title">Make Zat.am yours.</h1>
+          <div class="auth-story-underline" aria-hidden="true"></div>
+          <p class="auth-story-description">
+            Choose the language and location details that work for you. You can
+            always update them later from your profile.
+          </p>
+          <div class="auth-story-features" aria-label="Zat.am highlights">
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">✦</span
+              ><span>Play and learn through Sanskrit games</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">★</span
+              ><span>Save scores and celebrate progress</span>
+            </div>
+            <div class="auth-feature">
+              <span aria-hidden="true" class="auth-feature-icon">अ</span
+              ><span>Explore a language-rich experience</span>
+            </div>
           </div>
-
-        <!-- Country -->
-        <div class="form-group">
-          <label for="country">Choose Your Country</label>
-          <select data-cy="country-select" id="country" class="form-input">
-            <optgroup label="Popular Countries">
-            <option value="">Select Country</option>
-            <option value="United States">United States</option>
-            <option value="Canada">Canada</option>
-            </optgroup>
-            <optgroup label="All Countries" id="all-countries" class="all-countries">
-              
-            </optgroup>
-          </select>
-          
-        </div>
-
-          <!-- Province/State -->
-          <div data-cy="province-group" class="form-group hidden" id="province-group">
-            <label for="province">Select Province / State</label>
-            <select data-cy="province-select" id="province" class="form-input"></select>
+          <div class="auth-letter-tiles" aria-hidden="true">
+            <span>अ</span><span>आ</span><span>क</span>
           </div>
-
-
-        <!-- Other Country -->
-         
-        <div data-cy="other-country-group" class="form-group hidden" id="other-country-group" >
-          <label for="other-country">Enter Your Country</label>
-          <input data-cy="other-country-input" type="text" id="other-country" class="form-input" />
-        </div>
-
-          <!-- Buttons -->
-          <div class="button-group">
-            <button data-cy="continue-btn" type="submit" class="btn btn-primary">Continue</button>
-            <button data-cy="skip-btn" type="button" class="btn btn-secondary" id="skip-btn">
-              Skip for Now
-            </button>
+          <a class="auth-back-link" href="../index.html">← Back to Games</a>
+        </section>
+        <section class="auth-panel" aria-labelledby="heading">
+          <div class="auth-panel-top">
+            <p class="auth-kicker">MAKE IT YOURS</p>
+            <h2 id="heading" data-cy="pref-heading">Select Your Preferences</h2>
+            <span class="auth-panel-underline" aria-hidden="true"></span>
+            <p class="auth-panel-copy">
+              Set your preferred script and location for a more personal Zat.am
+              experience. You can change these anytime.
+            </p>
           </div>
-        </form>
-
-        <div data-cy="preferences-message" id="message"></div>
+          <form
+            id="preferences-form"
+            class="auth-form"
+            data-cy="preferences-form"
+          >
+            <div class="auth-field form-group">
+              <label for="language">Second language</label>
+              <select
+                data-cy="language-select"
+                id="language"
+                class="form-input"
+              >
+                <option value="">Select language</option>
+                <option value="1">Devanagari (देवनागरी)</option>
+                <option value="be">Bengali (বাংলা)</option>
+                <option value="gu">Gujarati (ગુજરાતી)</option>
+                <option value="ka">Kannada (ಕನ್ನಡ)</option>
+                <option value="ml">Malayalam (മലയാളം)</option>
+                <option value="te">Telugu (తెలుగు)</option>
+                <option value="ta">Tamil (தமிழ்)</option>
+              </select>
+            </div>
+            <div class="auth-field form-group">
+              <label for="country">Country</label>
+              <select data-cy="country-select" id="country" class="form-input">
+                <optgroup label="Popular Countries">
+                  <option value="">Select country</option>
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                </optgroup>
+                <optgroup
+                  label="All Countries"
+                  id="all-countries"
+                  class="all-countries"
+                ></optgroup>
+              </select>
+            </div>
+            <div
+              data-cy="province-group"
+              class="auth-field form-group hidden"
+              id="province-group"
+            >
+              <label for="province">Province / State</label
+              ><select
+                data-cy="province-select"
+                id="province"
+                class="form-input"
+              ></select>
+            </div>
+            <div
+              data-cy="other-country-group"
+              class="auth-field form-group hidden"
+              id="other-country-group"
+            >
+              <label for="other-country">Your country</label
+              ><input
+                data-cy="other-country-input"
+                type="text"
+                id="other-country"
+                class="form-input"
+                placeholder="Enter your country"
+                autocomplete="country-name"
+              />
+            </div>
+            <div class="auth-actions">
+              <button
+                data-cy="continue-btn"
+                type="submit"
+                class="auth-btn auth-btn-primary"
+              >
+                Save &amp; Continue <span aria-hidden="true">→</span></button
+              ><button
+                data-cy="skip-btn"
+                type="button"
+                class="auth-btn auth-btn-secondary"
+                id="skip-btn"
+              >
+                Skip for Now
+              </button>
+            </div>
+          </form>
+          <div
+            id="message"
+            class="auth-message"
+            data-cy="preferences-message"
+            role="status"
+            aria-live="polite"
+          ></div>
+        </section>
       </div>
-    </div>
-
+    </main>
+    <script type="module" src="../js/navbar-loader.js"></script>
+    <script type="module" src="./js/auth-ui.js"></script>
     <script type="module" src="./js/preferences.js"></script>
   </body>
 </html>
