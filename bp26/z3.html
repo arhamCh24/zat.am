@@ -52,10 +52,24 @@ body {
 
     background-attachment: fixed;
 }
+
+@media screen and (max-width: 600px) {
+    canvas {
+        width: 100vw !important;
+        height: auto !important;
+        max-width: 100vw !important;
+        display: block;
+        margin-left: -10px !important;
+        margin-right: auto !important;
+    
+    }
+}
     </style>
 </head>
 
 <body>
+
+
 
     <!-- ==============================
          Shared Navbar Placeholder
@@ -893,22 +907,15 @@ new Frame(
 function bp26OffsetZimCanvas() {
     const placeholder = document.getElementById("header-placeholder");
     const offset = placeholder ? placeholder.offsetHeight : 0;
-    const moveHigher = 20; 
+    const moveHigher = 20;
 
     document.querySelectorAll("canvas").forEach((canvas) => {
-        
-        if(window.innerWidth <= 600){
-           canvas.style.width = "calc(100vw - 16px)";
-            canvas.style.height = "auto";
-            canvas.style.maxWidth = "100%";
-            // canvas.style.marginTop = offset + "px";
-            canvas.style.marginTop = "-15px";
-            canvas.style.marginLeft = "-10";
-            canvas.style.marginRight = "0px"; 
-        } else{
-        canvas.style.marginTop = (offset - moveHigher) + "px";
-        canvas.style.height = `calc(100vh - ${offset}px)`;
+
+        if (window.innerWidth > 600) {
+            canvas.style.marginTop = (offset - moveHigher) + "px";
+            canvas.style.height = `calc(100vh - ${offset}px)`;
         }
+
     });
 }
 
@@ -954,6 +961,7 @@ async function submitScoreNow(finalScore) {
     }
 }
     </script>
+
 
 </body>
 </html>

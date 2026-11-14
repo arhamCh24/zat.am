@@ -396,7 +396,7 @@ document.addEventListener("keydown", function onPress(event) {
 
 populate_Numerale();
 
-
+ 
 window.populate_Numerale = populate_Numerale;
 window.toggleHardmode = toggleHardmode;
 window.add_Numeral = add_Numeral;
