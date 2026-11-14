@@ -388,7 +388,7 @@ document.addEventListener("keydown", function onPress(event) {
       togglePanel("winner", "none");
       
       guess.split('').map(n => {
-        remove_Numeral();
+        remove_Numeral(); 
       });
       
     };
